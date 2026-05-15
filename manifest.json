@@ -1,0 +1,43 @@
+{
+  "name": "魚魚副食品食材配對工具",
+  "short_name": "魚魚副食品",
+  "description": "智能嬰兒副食品配對與營養追蹤系統",
+  "start_url": "/baby-nutrition/",
+  "scope": "/baby-nutrition/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#faf7f0",
+  "theme_color": "#c8934a",
+  "lang": "zh-HK",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "lifestyle"],
+  "shortcuts": [
+    {
+      "name": "本週餐單",
+      "short_name": "餐單",
+      "description": "查看本週副食品餐單",
+      "url": "/baby-nutrition/?tab=weekly",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "營養追蹤",
+      "short_name": "追蹤",
+      "description": "查看本週營養追蹤",
+      "url": "/baby-nutrition/?tab=tracker",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
