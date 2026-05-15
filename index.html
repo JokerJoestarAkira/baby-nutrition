@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>小寶副食品系統 🌱</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@300;400;500&display=swap');
+:root {
+  --cream:#faf7f0; --warm:#fff9f2; --gold:#c8934a; --gold-l:#e8b97a;
+  --dk:#4a3120; --mid:#7a5c3e; --lt:#b89070; --sage:#7a9e7e;
+  --peach:#f0a070; --border:#e8d8c0; --r:14px;
+  --shadow:0 4px 20px rgba(74,49,32,0.10);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--cream);color:var(--dk);min-height:100vh}
+
+/* LOADING */
+#loading{position:fixed;inset:0;background:var(--cream);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:14px}
+.load-icon{font-size:52px;animation:bob 1s ease-in-out infinite alternate}
+@keyframes bob{to{transform:translateY(-14px)}}
+.load-text{font-family:'Noto Serif TC',serif;font-size:17px;color:var(--gold)}
+.load-sub{font-size:12px;color:var(--lt)}
+
+/* SETUP */
+#setup{display:none;position:fixed;inset:0;background:var(--cream);overflow-y:auto;padding:32px 20px}
+.setup-card{max-width:480px;margin:0 auto;background:var(--warm);border-radius:var(--r);border:1px solid var(--border);padding:28px;box-shadow:var(--shadow)}
+.setup-title{font-family:'Noto Serif TC',serif;font-size:20px;font-weight:700;color:var(--dk);margin-bottom:8px}
+.setup-sub{font-size:13px;color:var(--lt);margin-bottom:20px;line-height:1.7}
+.setup-step{font-size:13px;font-weight:700;color:var(--gold);margin:18px 0 6px}
+.setup-desc{font-size:12px;color:var(--mid);margin-bottom:8px;line-height:1.7}
+.setup-code{background:#f5ede0;border-radius:8px;padding:10px 12px;font-size:11px;font-family:monospace;color:var(--mid);margin:6px 0;line-height:1.9;word-break:break-all}
+.setup-input{width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--border);font-family:'Noto Sans TC',sans-serif;font-size:13px;background:#fffdf8;color:var(--dk);margin-bottom:4px}
+.setup-input:focus{outline:none;border-color:var(--gold)}
+.setup-hint{font-size:11px;color:#aaa;margin-bottom:10px}
+.setup-btn{width:100%;background:var(--gold);color:#fff;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Noto Serif TC',serif;letter-spacing:1px;margin-top:20px;box-shadow:0 4px 14px rgba(200,147,74,0.3)}
+.setup-btn:active{background:var(--gold-l)}
+.setup-error{font-size:12px;color:#e05050;margin-top:10px;display:none;padding:8px 12px;background:#fff0f0;border-radius:8px}
+
+/* APP */
+#app{display:none}
+header{background:var(--warm);border-bottom:2px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(74,49,32,0.06)}
+.hd{display:flex;align-items:center;justify-content:space-between;padding:12px 18px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{font-size:28px}
+.logo-title{font-family:'Noto Serif TC',serif;font-size:17px;font-weight:700;color:var(--dk);letter-spacing:1px}
+.logo-sub{font-size:11px;color:var(--lt);margin-top:1px}
+.sync{font-size:12px;padding:4px 10px;border-radius:20px;background:#e8f5e9;color:#388e3c;font-weight:500;opacity:0;transition:opacity 0.5s}
+.sync.show{opacity:1}
+nav{display:flex;overflow-x:auto;padding:0 16px;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+.nb{flex-shrink:0;background:none;border:none;border-bottom:3px solid transparent;padding:10px 14px;cursor:pointer;font-size:13px;color:var(--lt);font-family:'Noto Sans TC',sans-serif;white-space:nowrap;transition:all 0.2s}
+.nb.active{color:var(--dk);border-bottom-color:var(--gold);font-weight:600}
+
+main{padding:18px 16px 40px;max-width:700px;margin:0 auto}
+.st{font-family:'Noto Serif TC',serif;font-size:19px;font-weight:700;color:var(--dk);border-left:4px solid var(--gold);padding-left:12px;margin-bottom:16px}
+.ss{font-size:13px;color:var(--lt);margin-bottom:16px;margin-top:-10px}
+
+.day-tabs{display:flex;gap:8px;overflow-x:auto;margin-bottom:16px;scrollbar-width:none}
+.day-tabs::-webkit-scrollbar{display:none}
+.db{flex-shrink:0;background:#f0e8d8;border:none;border-radius:20px;padding:7px 15px;cursor:pointer;font-size:13px;color:var(--mid);font-family:'Noto Sans TC',sans-serif;transition:all 0.2s}
+.db.active{background:var(--gold);color:#fff;font-weight:600}
+
+.mc{background:var(--warm);border-radius:var(--r);border:1px solid var(--border);padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
+.mh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.mn{font-size:11px;background:var(--gold);color:#fff;border-radius:10px;padding:3px 9px;margin-right:6px}
+.mname{font-family:'Noto Serif TC',serif;font-size:15px;font-weight:700;color:var(--dk)}
+.mp{font-size:11px;color:var(--mid);background:#f5ede0;border-radius:10px;padding:4px 10px}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fi{background:#f9f4ee;border-radius:10px;padding:12px;cursor:pointer;border:2px solid transparent;transition:all 0.2s;user-select:none}
+.fi:active{transform:scale(0.97)}
+.fi.eaten{background:#ecf7ec;border-color:var(--sage)}
+.frole{font-size:10px;color:var(--lt);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px}
+.fname{font-size:15px;font-weight:600;color:var(--dk)}
+.fdet{font-size:11px;color:var(--gold);margin-top:3px}
+.ftex{font-size:11px;color:#aaa;margin-top:2px}
+.fnote{font-size:11px;color:var(--lt);margin-top:5px;line-height:1.4}
+.fchk{font-size:11px;margin-top:8px;color:#bbb;font-weight:500}
+.fi.eaten .fchk{color:var(--sage)}
+.tip{font-size:12px;color:var(--peach);margin-top:10px;padding:7px 10px;background:#fff8f0;border-radius:8px;line-height:1.5}
+.na{margin-top:14px}
+.nl{font-size:13px;color:var(--mid);font-weight:600;margin-bottom:6px}
+textarea{width:100%;min-height:75px;padding:10px 12px;border-radius:10px;border:1px solid var(--border);font-family:'Noto Sans TC',sans-serif;font-size:13px;resize:vertical;background:#fffdf8;color:var(--dk);line-height:1.5}
+textarea:focus{outline:none;border-color:var(--gold)}
+
+.tn{font-size:12px;color:var(--lt);margin-bottom:18px;padding:8px 12px;background:#f5ede0;border-radius:8px;line-height:1.5}
+.nr{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.nname{width:75px;font-size:13px;font-weight:600;color:var(--dk);flex-shrink:0}
+.bw{flex:1;height:12px;background:#e8e0d0;border-radius:6px;overflow:hidden}
+.bf{height:100%;border-radius:6px;transition:width 0.6s ease}
+.bpct{width:38px;font-size:12px;font-weight:700;text-align:right;flex-shrink:0}
+.bst{width:60px;font-size:11px;text-align:right;flex-shrink:0}
+.ib{border-radius:var(--r);padding:16px;margin-top:18px}
+.ib.warn{background:#fff8f0;border:1px solid #f0d0a0}
+.ib.ok{background:#f0faf0;border:1px solid #b0d8b0}
+.ib.plain{background:#fff;border:1px solid var(--border)}
+.it{font-family:'Noto Serif TC',serif;font-size:15px;font-weight:700;color:var(--dk);margin-bottom:10px}
+.ii{font-size:13px;color:var(--mid);margin-bottom:7px;line-height:1.6}
+.ftags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.ftag{background:#e8f0e0;color:#4a6e3e;border-radius:12px;padding:3px 10px;font-size:12px}
+
+.pg{margin-bottom:14px}
+.pl{font-size:13px;font-weight:600;color:var(--dk);margin-bottom:6px}
+select{width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--border);font-family:'Noto Sans TC',sans-serif;font-size:14px;background:#fffdf8;color:var(--dk);appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23c8934a' d='M6 8L0 0h12z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+select:focus{outline:none;border-color:var(--gold)}
+.gbtn{width:100%;background:var(--gold);color:#fff;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Noto Serif TC',serif;letter-spacing:1px;margin-top:4px;margin-bottom:18px;box-shadow:0 4px 14px rgba(200,147,74,0.3)}
+.gbtn:active{background:var(--gold-l)}
+.gc{background:var(--warm);border-radius:var(--r);border:2px solid var(--gold);padding:18px;animation:fi 0.3s ease}
+@keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.gct{font-family:'Noto Serif TC',serif;font-size:16px;font-weight:700;color:var(--dk);margin-bottom:12px}
+.gf{display:flex;align-items:center;gap:10px;padding:9px 12px;background:#f9f4ee;border-radius:9px;margin-bottom:8px}
+.gfn{font-weight:600;font-size:14px}
+.gfp{font-size:12px;color:var(--gold);margin-left:auto}
+.gftx{font-size:11px;color:#aaa;margin-left:8px}
+.gng{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:12px 0}
+.gni{background:#f5ede0;border-radius:8px;padding:8px 10px;font-size:12px;display:flex;justify-content:space-between}
+.gnl{color:var(--mid)}
+.gnv{font-weight:600;color:var(--dk)}
+.gnote{font-size:12px;color:var(--peach);background:#fff8f0;border-radius:8px;padding:9px 12px;margin-top:8px;line-height:1.5}
+.gcook{font-size:12px;color:var(--mid);font-style:italic;margin-top:10px}
+
+.gg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.gcard{background:var(--warm);border-radius:10px;padding:12px;border:1px solid var(--border)}
+.gcn{font-size:15px;font-weight:700;color:var(--dk);margin-bottom:4px}
+.gctex{font-size:11px;color:var(--gold);margin-bottom:7px}
+.gnr{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}
+.gntag{font-size:10px;background:#f0e8d8;color:var(--mid);border-radius:8px;padding:2px 7px}
+.gcnote{font-size:11px;color:var(--lt);line-height:1.4}
+.rb{background:#fff8f0;border:1px solid #f0d0a0;border-radius:var(--r);padding:16px}
+.ri{font-size:13px;color:var(--mid);margin-bottom:9px;line-height:1.6;padding-left:16px;position:relative}
+.ri::before{content:"•";position:absolute;left:0;color:var(--gold)}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="load-icon">🌱</div>
+  <div class="load-text">小寶副食品系統</div>
+  <div class="load-sub" id="load-sub">連接資料庫中…</div>
+</div>
+
+<div id="setup">
+  <div class="setup-card">
+    <div class="setup-title">🔧 首次設定（只需做一次）</div>
+    <div class="setup-sub">完成後所有家庭成員只需開啟同一條連結，資料即時共用。<br>全程免費，無需信用卡。</div>
+
+    <div class="setup-step">① 建立 Supabase 帳戶</div>
+    <div class="setup-desc">
+      1. 到 <strong>supabase.com</strong> → 點「Start your project」<br>
+      2. 用電郵註冊（免費，無需信用卡）<br>
+      3. 建立新 Project，名稱填 <strong>baby-nutrition</strong>，地區選 <strong>Singapore</strong><br>
+      4. 等待約1分鐘 Project 完成建立
+    </div>
+
+    <div class="setup-step">② 建立資料表（複製以下代碼）</div>
+    <div class="setup-desc">進入 Project → 左欄點「<strong>SQL Editor</strong>」→ 貼上以下內容 → 點「Run」</div>
+    <div class="setup-code">create table baby_log (<br>
+&nbsp;&nbsp;id text primary key default 'main',<br>
+&nbsp;&nbsp;log jsonb default '{}',<br>
+&nbsp;&nbsp;notes jsonb default '{}',<br>
+&nbsp;&nbsp;updated_at timestamptz default now()<br>
+);<br>
+insert into baby_log (id) values ('main') on conflict do nothing;<br>
+alter table baby_log enable row level security;<br>
+create policy "allow_all" on baby_log for all using (true);</div>
+
+    <div class="setup-step">③ 填入連接資料</div>
+    <div class="setup-desc">左欄點「<strong>Project Settings</strong>」→「<strong>API</strong>」→ 複製以下兩項：</div>
+    <input class="setup-input" id="inp-url" placeholder="Project URL（例：https://abcxyz.supabase.co）">
+    <div class="setup-hint">位置：Settings → API → Project URL</div>
+    <input class="setup-input" id="inp-key" placeholder="anon public key（以 eyJ 開頭的長字串）">
+    <div class="setup-hint">位置：Settings → API → Project API keys → anon public</div>
+
+    <button class="setup-btn" id="setup-btn">連接並開始使用 →</button>
+    <div class="setup-error" id="setup-err"></div>
+  </div>
+</div>
+
+<div id="app">
+  <header>
+    <div class="hd">
+      <div class="logo">
+        <div class="logo-icon">🌱</div>
+        <div>
+          <div class="logo-title">小寶副食品系統</div>
+          <div class="logo-sub">10個月 · 家庭共用版</div>
+        </div>
+      </div>
+      <div class="sync" id="sync">已同步 ✓</div>
+    </div>
+    <nav>
+      <button class="nb active" data-tab="weekly">📅 本週餐單</button>
+      <button class="nb" data-tab="tracker">📊 營養追蹤</button>
+      <button class="nb" data-tab="builder">🧩 配搭工具</button>
+      <button class="nb" data-tab="guide">📋 食材指引</button>
+    </nav>
+  </header>
+  <main id="mc"></main>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────
+const F = {
+  牛肉末: {g:["protein","iron"], iron:2.6,zinc:4.8,vitD:0,  calcium:6,  protein:26,dha:0,   fiber:0,  p:30,tex:"碎粒",        n:"補鐵首選，動物性鐵吸收率高"},
+  豬肉末: {g:["protein","iron"], iron:1.0,zinc:2.9,vitD:0,  calcium:6,  protein:27,dha:0,   fiber:0,  p:30,tex:"碎粒",        n:""},
+  雞腿肉: {g:["protein","iron"], iron:1.3,zinc:2.0,vitD:0,  calcium:11, protein:27,dha:0,   fiber:0,  p:30,tex:"碎粒/手指食物",n:"深色肉鐵質較高"},
+  豬肝:   {g:["protein","iron"], iron:13, zinc:4.0,vitD:1.2,calcium:5,  protein:21,dha:0,   fiber:0,  p:20,tex:"泥狀",        n:"⚠️ 每週不超過2次"},
+  鮭魚:   {g:["protein","dha"],  iron:0.8,zinc:0.6,vitD:11, calcium:12, protein:25,dha:2200,fiber:0,  p:30,tex:"碎粒/手指食物",n:"DHA首選，去骨後壓碎"},
+  白魚肉: {g:["protein"],        iron:0.4,zinc:0.4,vitD:2,  calcium:16, protein:19,dha:300, fiber:0,  p:30,tex:"碎粒",        n:"低過敏，適合初試海鮮"},
+  雞蛋:   {g:["protein","vitD"], iron:1.8,zinc:1.1,vitD:2,  calcium:50, protein:13,dha:100, fiber:0,  p:50,tex:"蒸蛋/炒蛋",  n:"確認不過敏後每日可用"},
+  板豆腐: {g:["protein","calcium"],iron:1.5,zinc:0.6,vitD:0,calcium:350,protein:8, dha:0,   fiber:0.3,p:50,tex:"碎粒/手指食物",n:"補鈣好選擇"},
+  軟飯:   {g:["carb"],           iron:0.1,zinc:0.6,vitD:0,  calcium:2,  protein:2.7,dha:0,  fiber:0.2,p:80,tex:"軟飯",        n:""},
+  地瓜:   {g:["carb","fiber"],   iron:0.6,zinc:0.3,vitD:0,  calcium:30, protein:1.6,dha:0,  fiber:3,  p:70,tex:"泥狀/手指食物",n:"富含β-胡蘿蔔素"},
+  馬鈴薯: {g:["carb","fiber"],   iron:0.8,zinc:0.3,vitD:0,  calcium:12, protein:2,  dha:0,  fiber:2.2,p:70,tex:"泥狀",        n:""},
+  南瓜:   {g:["veg","vitC"],     iron:0.8,zinc:0.1,vitD:0,  calcium:21, protein:1,  dha:0,  fiber:0.5,p:30,tex:"泥狀/手指食物",n:""},
+  菠菜:   {g:["veg","iron","vitC"],iron:2.7,zinc:0.5,vitD:0,calcium:99, protein:2.9,dha:0,  fiber:2.2,p:25,tex:"泥狀/碎粒",  n:"植物性鐵，配維C效果更好"},
+  莧菜:   {g:["veg","iron","calcium"],iron:2.5,zinc:0.6,vitD:0,calcium:180,protein:2.5,dha:0,fiber:2, p:25,tex:"泥狀/碎粒",  n:"鐵+鈣雙補"},
+  紅蘿蔔: {g:["veg"],            iron:0.3,zinc:0.2,vitD:0,  calcium:33, protein:0.9,dha:0,  fiber:2.8,p:30,tex:"泥狀/手指食物",n:""},
+  番茄:   {g:["veg","vitC"],     iron:0.3,zinc:0.2,vitD:0,  calcium:10, protein:0.9,dha:0,  fiber:1.2,p:30,tex:"泥狀/碎粒",  n:"維C助鐵吸收，補鐵餐必配"},
+  菇類:   {g:["veg","vitD"],     iron:0.5,zinc:0.5,vitD:5,  calcium:3,  protein:3,  dha:0,  fiber:2,  p:25,tex:"碎粒",       n:"日曬香菇維D較高"},
+  牛油果: {g:["fruit","fat","fiber"],iron:0.6,zinc:0.6,vitD:0,calcium:12,protein:2, dha:0,  fiber:6.7,p:40,tex:"手指食物",   n:"健康脂肪，軟熟切條即用"},
+  香蕉:   {g:["fruit","fiber"],  iron:0.3,zinc:0.2,vitD:0,  calcium:5,  protein:1.1,dha:0,  fiber:2.6,p:40,tex:"手指食物",   n:""},
+  蘋果:   {g:["fruit","vitC","fiber"],iron:0.1,zinc:0,vitD:0,calcium:6, protein:0.3,dha:0,  fiber:2.4,p:40,tex:"蒸軟後手指食物",n:"維C助鐵吸收"},
+  雪梨:   {g:["fruit","fiber"],  iron:0.2,zinc:0.1,vitD:0,  calcium:9,  protein:0.4,dha:0,  fiber:3.1,p:40,tex:"蒸軟/手指食物",n:"潤腸通便"},
+};
+
+const MENU=[
+  {day:"一",meals:[{name:"牛肉菠菜軟飯",foods:["牛肉末","菠菜","軟飯","蘋果"],purpose:"重點補鐵",tip:"補鐵餐：餐前後1小時勿餵奶"},{name:"鮭魚南瓜粥",foods:["鮭魚","南瓜","軟飯","香蕉"],purpose:"補DHA",tip:"鮭魚去骨壓碎，少量檸檬去腥"}]},
+  {day:"二",meals:[{name:"雞腿肉莧菜地瓜",foods:["雞腿肉","莧菜","地瓜","雪梨"],purpose:"鐵+鈣雙補",tip:""},{name:"蒸蛋豆腐菇菇粥",foods:["雞蛋","板豆腐","菇類","牛油果"],purpose:"補鈣+維D",tip:"日曬香菇維D更豐富"}]},
+  {day:"三",meals:[{name:"牛肉番茄馬鈴薯",foods:["牛肉末","番茄","馬鈴薯","蘋果"],purpose:"補鐵+維C促吸收",tip:"補鐵餐：餐前後1小時勿餵奶"},{name:"白魚紅蘿蔔軟飯",foods:["白魚肉","紅蘿蔔","軟飯","香蕉"],purpose:"低過敏蛋白",tip:""}]},
+  {day:"四",meals:[{name:"豬肝菠菜粥",foods:["豬肝","菠菜","軟飯","雪梨"],purpose:"高鐵日",tip:"豬肝每週不超過2次，份量約20g"},{name:"雞蛋南瓜地瓜",foods:["雞蛋","南瓜","地瓜","牛油果"],purpose:"蛋白+健康脂肪",tip:""}]},
+  {day:"五",meals:[{name:"鮭魚莧菜地瓜",foods:["鮭魚","莧菜","地瓜","蘋果"],purpose:"DHA+鈣",tip:""},{name:"雞腿肉菇菇軟飯",foods:["雞腿肉","菇類","軟飯","香蕉"],purpose:"蛋白+維D",tip:""}]},
+  {day:"六",meals:[{name:"牛肉紅蘿蔔馬鈴薯",foods:["牛肉末","紅蘿蔔","馬鈴薯","雪梨"],purpose:"補鐵+膳纖",tip:"補鐵餐：餐前後1小時勿餵奶"},{name:"豆腐番茄菠菜粥",foods:["板豆腐","番茄","菠菜","牛油果"],purpose:"補鈣+植物鐵",tip:""}]},
+  {day:"日",meals:[{name:"豬肉末南瓜軟飯",foods:["豬肉末","南瓜","軟飯","香蕉"],purpose:"均衡日",tip:""},{name:"雞蛋鮭魚莧菜粥",foods:["雞蛋","鮭魚","莧菜","蘋果"],purpose:"DHA+鐵+鈣",tip:""}]},
+];
+
+const NUT=[
+  {k:"iron",   l:"鐵質",   u:"mg", d:10,  m:0.31},
+  {k:"zinc",   l:"鋅",     u:"mg", d:3,   m:0.43},
+  {k:"vitD",   l:"維他命D",u:"mcg",d:10,  m:1.1},
+  {k:"calcium",l:"鈣質",   u:"mg", d:260, m:36},
+  {k:"protein",l:"蛋白質", u:"g",  d:11,  m:1.3},
+  {k:"dha",    l:"DHA",    u:"mg", d:100, m:18},
+  {k:"fiber",  l:"膳食纖維",u:"g", d:5,   m:0},
+];
+
+const IRON_FOODS=["牛肉末","豬肝","雞腿肉","豬肉末","菠菜","莧菜"];
+const MILK=720;
+
+// ── STATE ─────────────────────────────────────────────
+let sb=null, S={tab:"weekly",day:0,log:{},notes:{},pm:"",pv:"",pc:"",gen:null};
+let saveT=null;
+
+// ── SUPABASE ──────────────────────────────────────────
+async function initSB(url,key){
+  sb=window.supabase.createClient(url,key);
+  const {error}=await sb.from("baby_log").select("id").eq("id","main").single();
+  if(error) throw error;
+}
+async function load(){
+  if(!sb) return;
+  const {data}=await sb.from("baby_log").select("log,notes").eq("id","main").single();
+  if(data){S.log=data.log||{};S.notes=data.notes||{};}
+}
+async function save(){
+  if(!sb) return;
+  clearTimeout(saveT);
+  saveT=setTimeout(async()=>{
+    await sb.from("baby_log").upsert({id:"main",log:S.log,notes:S.notes,updated_at:new Date().toISOString()});
+    const s=document.getElementById("sync");if(s){s.classList.add("show");setTimeout(()=>s.classList.remove("show"),2500);}
+  },700);
+}
+
+// ── SCREEN ────────────────────────────────────────────
+function show(id){
+  document.getElementById("loading").style.display="none";
+  document.getElementById("setup").style.display=id==="setup"?"block":"none";
+  document.getElementById("app").style.display=id==="app"?"block":"none";
+}
+
+// ── STARTUP ───────────────────────────────────────────
+async function startup(){
+  const u=localStorage.getItem("sb_u"), k=localStorage.getItem("sb_k");
+  if(u&&k){
+    try{
+      await initSB(u,k); await load(); show("app"); render();
+      setInterval(async()=>{await load();render();},15000);
+    }catch(e){
+      localStorage.removeItem("sb_u");localStorage.removeItem("sb_k");
+      show("setup");
+    }
+  } else { show("setup"); }
+}
+
+document.getElementById("setup-btn").addEventListener("click",async()=>{
+  const u=document.getElementById("inp-url").value.trim();
+  const k=document.getElementById("inp-key").value.trim();
+  const err=document.getElementById("setup-err");
+  err.style.display="none";
+  if(!u||!k){err.textContent="請填入 URL 和 Key";err.style.display="block";return;}
+  document.getElementById("setup-btn").textContent="連接中…";
+  try{
+    await initSB(u,k);
+    localStorage.setItem("sb_u",u);localStorage.setItem("sb_k",k);
+    await load(); show("app"); render();
+    setInterval(async()=>{await load();render();},15000);
+  }catch(e){
+    err.textContent="連接失敗，請確認 URL 和 Key 是否正確，以及 SQL 是否已執行";
+    err.style.display="block";
+    document.getElementById("setup-btn").textContent="連接並開始使用 →";
+  }
+});
+
+// ── LOGIC ─────────────────────────────────────────────
+function toggle(di,mi,food){
+  const key=`${di}-${mi}`,cur=S.log[key]||[];
+  S.log[key]=cur.includes(food)?cur.filter(f=>f!==food):[...cur,food];
+  save(); render();
+}
+function totals(){
+  const t={};
+  NUT.forEach(n=>{t[n.k]=n.m*MILK/100*7;});
+  Object.values(S.log).forEach(foods=>foods.forEach(food=>{
+    const f=F[food];if(!f)return;
+    NUT.forEach(n=>{t[n.k]=(t[n.k]||0)+(f[n.k]||0)*f.p/100;});
+  }));
+  return t;
+}
+function genMeal(){
+  const main=S.pm;if(!main)return;
+  const veg=S.pv||(IRON_FOODS.includes(main)?"番茄":"南瓜");
+  const carb=S.pc||"軟飯";
+  const nut={};
+  [main,veg,carb].forEach(food=>{const f=F[food];if(!f)return;NUT.forEach(n=>{nut[n.k]=(nut[n.k]||0)+(f[n.k]||0)*f.p/100;});});
+  S.gen={foods:[main,veg,carb],nut,tex:F[main].tex,notes:[F[main].n,F[veg]?.n].filter(Boolean),iron:IRON_FOODS.includes(main)};
+  render();
+}
+
+// ── RENDER ────────────────────────────────────────────
+function render(){
+  const mc=document.getElementById("mc");if(!mc)return;
+  mc.innerHTML={weekly:rWeekly,tracker:rTracker,builder:rBuilder,guide:rGuide}[S.tab]();
+  bind();
+}
+
+function rWeekly(){
+  const d=S.day, days=MENU.map((m,i)=>`<button class="db${i===d?" active":""}" data-day="${i}">${m.day}</button>`).join("");
+  const meals=MENU[d].meals.map((meal,mi)=>{
+    const eaten=S.log[`${d}-${mi}`]||[];
+    const foods=meal.foods.map(food=>{
+      const f=F[food];if(!f)return"";
+      const role=f.g.includes("protein")?"蛋白質":f.g.includes("carb")?"主食":f.g.includes("fruit")?"水果/手指":"蔬菜";
+      const e=eaten.includes(food);
+      return`<div class="fi${e?" eaten":""}" data-t="${d}|${mi}|${food}">
+        <div class="frole">${role}</div><div class="fname">${food}</div>
+        <div class="fdet">${f.p}g · 鐵 ${(f.iron*f.p/100).toFixed(1)}mg</div>
+        <div class="ftex">${f.tex}</div>
+        ${f.n?`<div class="fnote">${f.n}</div>`:""}
+        <div class="fchk">${e?"✓ 已食用":"點擊標記"}</div>
+      </div>`;
+    }).join("");
+    return`<div class="mc"><div class="mh"><div><span class="mn">第${mi===0?"一":"二"}餐</span><span class="mname">${meal.name}</span></div><span class="mp">${meal.purpose}</span></div><div class="fg">${foods}</div>${meal.tip?`<div class="tip">💡 ${meal.tip}</div>`:""}</div>`;
+  }).join("");
+  return`<div class="st">本週副食品餐單</div><div class="day-tabs">${days}</div>${meals}
+    <div class="na"><div class="nl">📝 今日觀察筆記</div>
+    <textarea id="ni" placeholder="記錄今日進食反應、大便情況、過敏觀察…">${S.notes[d]||""}</textarea></div>`;
+}
+
+function rTracker(){
+  const t=totals();
+  const rows=NUT.map(n=>{
+    const pct=Math.min(100,Math.round((t[n.k]||0)/(n.d*7)*100));
+    const c=pct>=80?"#4caf50":pct>=50?"#ff9800":"#f44336";
+    return`<div class="nr"><div class="nname">${n.l}</div><div class="bw"><div class="bf" style="width:${pct}%;background:${c}"></div></div><div class="bpct" style="color:${c}">${pct}%</div><div class="bst">${pct>=80?"✅":pct>=50?"⚠️":"🔴"}</div></div>`;
+  }).join("");
+  const def=NUT.filter(n=>Math.min(100,(t[n.k]||0)/(n.d*7)*100)<80);
+  const suggest={iron:"牛肉末、豬肝、莧菜",vitD:"鮭魚、雞蛋、日曬香菇",calcium:"板豆腐、莧菜、菠菜",dha:"鮭魚（每週至少2次）",fiber:"地瓜、雪梨、牛油果"};
+  const defBox=def.length===0?`<div class="ib ok"><div class="it">🎉 本週所有營養素均達標！</div></div>`:
+    `<div class="ib warn"><div class="it">⚠️ 本週需加強補充</div>${def.map(n=>`<div class="ii">🔸 <strong>${n.l}</strong>：建議加入 ${suggest[n.k]||"相關食材"}</div>`).join("")}</div>`;
+  const eaten=[...new Set(Object.values(S.log).flat())];
+  return`<div class="st">本週營養追蹤</div>
+    <div class="tn">數據 = 奶粉（720mL/日 × 7日）+ 已標記副食品<br>每日目標：鐵10mg · 鈣260mg · 維D 10mcg · DHA 100mg</div>
+    ${rows}${defBox}
+    <div class="ib plain" style="margin-top:14px"><div class="it">📋 本週已食用食材</div>
+    <div class="ftags">${eaten.length===0?`<span style="font-size:13px;color:#bbb">尚未標記任何食材</span>`:eaten.map(f=>`<span class="ftag">${f}</span>`).join("")}</div></div>`;
+}
+
+function rBuilder(){
+  const ps=Object.entries(F).filter(([,v])=>v.g.includes("protein")).map(([k])=>k);
+  const vs=Object.entries(F).filter(([,v])=>v.g.includes("veg")).map(([k])=>k);
+  const cs=Object.entries(F).filter(([,v])=>v.g.includes("carb")).map(([k])=>k);
+  const gc=S.gen?`<div class="gc"><div class="gct">🍽️ 建議餐單</div>
+    ${S.gen.foods.map(food=>{const f=F[food];if(!f)return"";return`<div class="gf"><span class="gfn">${food}</span><span class="gftx">${f.tex}</span><span class="gfp">${f.p}g</span></div>`;}).join("")}
+    <div class="gng">${NUT.filter(n=>n.k!=="fiber").map(n=>`<div class="gni"><span class="gnl">${n.l}</span><span class="gnv">${(S.gen.nut[n.k]||0).toFixed(1)}${n.u}</span></div>`).join("")}</div>
+    ${S.gen.notes.filter(Boolean).length?`<div class="gnote">💡 ${S.gen.notes.filter(Boolean).join(" · ")}</div>`:""}
+    ${S.gen.iron?`<div class="gnote">⚠️ 補鐵餐：餐前後1小時勿餵奶</div>`:""}
+    <div class="gcook">🔥 蒸熟後調整為${S.gen.tex}，不加鹽糖調味</div></div>`:"";
+  return`<div class="st">快速配搭工具</div><div class="ss">選擇主食材，系統自動完成均衡配搭</div>
+    <div class="pg"><div class="pl">🥩 蛋白質（必選）</div>
+    <select id="pm"><option value="">-- 選擇 --</option>${ps.map(f=>`<option value="${f}"${S.pm===f?" selected":""}>${f}</option>`).join("")}</select></div>
+    <div class="pg"><div class="pl">🥦 蔬菜（留空自動推薦）</div>
+    <select id="pv"><option value="">自動推薦</option>${vs.map(f=>`<option value="${f}"${S.pv===f?" selected":""}>${f}</option>`).join("")}</select></div>
+    <div class="pg"><div class="pl">🍚 主食（留空預設軟飯）</div>
+    <select id="pc"><option value="">軟飯（預設）</option>${cs.map(f=>`<option value="${f}"${S.pc===f?" selected":""}>${f}</option>`).join("")}</select></div>
+    <button class="gbtn" id="gbtn">生成餐單建議 →</button>${gc}`;
+}
+
+function rGuide(){
+  const cards=Object.entries(F).map(([name,f])=>{
+    const nuts=[`鐵 ${f.iron}mg`,`鈣 ${f.calcium}mg`,`蛋白 ${f.protein}g`,...(f.dha>0?[`DHA ${f.dha}mg`]:[]),...(f.vitD>0?[`維D ${f.vitD}mcg`]:[])].map(t=>`<span class="gntag">${t}</span>`).join("");
+    return`<div class="gcard"><div class="gcn">${name}</div><div class="gctex">${f.tex} · ${f.p}g/次</div><div class="gnr">${nuts}</div>${f.n?`<div class="gcnote">${f.n}</div>`:""}</div>`;
+  }).join("");
+  const rules=["補鐵餐（紅肉、豬肝）與喝奶至少相隔1–2小時","豬肝每週不超過2次（維他命A過量風險）","引入新食材後觀察3–5天，確認無過敏","不加鹽、糖、味精，減少腎臟負擔","一歲前絕不可吃蜂蜜（肉毒桿菌，可致命）","每餐食材3–4種，避免過多消化負擔","手指食物切成約1cm×1cm小塊，防哽噎","含鐵食物同時搭配維C食物（番茄、蘋果），提升吸收率"].map(r=>`<div class="ri">${r}</div>`).join("");
+  return`<div class="st">食材參考指引</div><div class="gg">${cards}</div><div class="rb"><div class="it">⚠️ 重要飲食原則</div>${rules}</div>`;
+}
+
+// ── BIND ──────────────────────────────────────────────
+function bind(){
+  document.querySelectorAll(".nb").forEach(b=>b.addEventListener("click",()=>{
+    S.tab=b.dataset.tab;document.querySelectorAll(".nb").forEach(x=>x.classList.remove("active"));b.classList.add("active");render();
+  }));
+  document.querySelectorAll(".db").forEach(b=>b.addEventListener("click",()=>{S.day=parseInt(b.dataset.day);render();}));
+  document.querySelectorAll("[data-t]").forEach(el=>el.addEventListener("click",()=>{
+    const[d,m,...fp]=el.dataset.t.split("|");toggle(parseInt(d),parseInt(m),fp.join("|"));
+  }));
+  const ni=document.getElementById("ni");
+  if(ni)ni.addEventListener("input",e=>{S.notes[S.day]=e.target.value;save();});
+  ["pm","pv","pc"].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.addEventListener("change",e=>{S[id]=e.target.value;});
+  });
+  const gb=document.getElementById("gbtn");
+  if(gb)gb.addEventListener("click",genMeal);
+}
+
+startup();
+</script>
+</body>
+</html>
