@@ -1,0 +1,1983 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+<!-- PWA 支援 -->
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="魚魚副食品">
+<meta name="theme-color" content="#c8934a">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
+<meta name="mobile-web-app-capable" content="yes">
+<title>魚魚副食品食材配對工具 🐟</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Noto+Sans+TC:wght@300;400;500&display=swap');
+:root{--cream:#faf7f0;--warm:#fff9f2;--gold:#c8934a;--gold-l:#f5e6cc;--dk:#4a3120;--mid:#7a5c3e;--lt:#b89070;--sage:#7a9e7e;--peach:#f0a070;--border:#e8d8c0;--r:14px;--shadow:0 4px 20px rgba(74,49,32,0.10);--red:#e05050;--orange:#f0a030;--green:#4caf50}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--cream);color:var(--dk);min-height:100vh}
+header{background:var(--warm);border-bottom:2px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(74,49,32,0.06)}
+.hd{display:flex;align-items:center;justify-content:space-between;padding:12px 18px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{font-size:26px}.logo-title{font-family:'Noto Serif TC',serif;font-size:15px;font-weight:700;color:var(--dk);letter-spacing:1px}
+.logo-sub{font-size:11px;color:var(--lt);margin-top:1px}
+.save-dot{width:8px;height:8px;border-radius:50%;background:#ccc;transition:background 0.3s;flex-shrink:0}
+.save-dot.saved{background:#4caf50}
+nav{display:flex;overflow-x:auto;padding:0 12px;scrollbar-width:none}nav::-webkit-scrollbar{display:none}
+.nb{flex-shrink:0;background:none;border:none;border-bottom:3px solid transparent;padding:9px 12px;cursor:pointer;font-size:12px;color:var(--lt);font-family:'Noto Sans TC',sans-serif;white-space:nowrap;transition:all 0.2s}
+.nb.active{color:var(--dk);border-bottom-color:var(--gold);font-weight:600}
+main{padding:16px 14px 80px;max-width:700px;margin:0 auto}
+.st{font-family:'Noto Serif TC',serif;font-size:18px;font-weight:700;color:var(--dk);border-left:4px solid var(--gold);padding-left:12px;margin-bottom:14px}
+.ss{font-size:12px;color:var(--lt);margin-bottom:14px;margin-top:-8px;line-height:1.6}
+.card{background:var(--warm);border-radius:var(--r);border:1px solid var(--border);padding:14px;margin-bottom:12px;box-shadow:var(--shadow)}
+.day-tabs{display:flex;gap:7px;overflow-x:auto;margin-bottom:14px;scrollbar-width:none;padding-bottom:2px}
+.day-tabs::-webkit-scrollbar{display:none}
+.db{flex-shrink:0;background:#f0e8d8;border:none;border-radius:20px;padding:6px 14px;cursor:pointer;font-size:13px;color:var(--mid);font-family:'Noto Sans TC',sans-serif;transition:all 0.2s}
+.db.active{background:var(--gold);color:#fff;font-weight:600}
+.mh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap;gap:6px}
+.mn-badge{font-size:11px;background:var(--gold);color:#fff;border-radius:10px;padding:3px 9px;margin-right:6px}
+.mn-badge.two{background:var(--sage)}
+.mname{font-family:'Noto Serif TC',serif;font-size:14px;font-weight:700;color:var(--dk)}
+.mp{font-size:11px;color:var(--mid);background:#f5ede0;border-radius:10px;padding:3px 9px}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.fi{background:#f9f4ee;border-radius:10px;padding:11px;cursor:pointer;border:2px solid transparent;transition:all 0.2s;user-select:none;-webkit-user-select:none}
+.fi:active{transform:scale(0.97)}.fi.eaten{background:#ecf7ec;border-color:var(--sage)}
+.frole{font-size:10px;color:var(--lt);margin-bottom:3px}.fname{font-size:14px;font-weight:600;color:var(--dk)}
+.fdet{font-size:11px;color:var(--gold);margin-top:2px}.ftex{font-size:10px;color:#aaa;margin-top:2px}
+.fnote{font-size:10px;color:var(--lt);margin-top:4px;line-height:1.4}
+.fchk{font-size:11px;margin-top:7px;color:#bbb;font-weight:500}.fi.eaten .fchk{color:var(--sage)}
+.tip{font-size:12px;color:var(--peach);margin-top:9px;padding:7px 10px;background:#fff8f0;border-radius:8px;line-height:1.5}
+textarea{width:100%;min-height:70px;padding:10px;border-radius:10px;border:1px solid var(--border);font-family:'Noto Sans TC',sans-serif;font-size:13px;resize:vertical;background:#fffdf8;color:var(--dk);line-height:1.5}
+textarea:focus{outline:none;border-color:var(--gold)}
+.tn{font-size:12px;color:var(--lt);margin-bottom:14px;padding:8px 12px;background:#f5ede0;border-radius:8px;line-height:1.6}
+.nr{display:flex;align-items:center;gap:9px;margin-bottom:13px}
+.nname{width:70px;font-size:12px;font-weight:600;color:var(--dk);flex-shrink:0}
+.bw{flex:1;height:13px;background:#e8e0d0;border-radius:7px;overflow:hidden}
+.bf{height:100%;border-radius:7px;transition:width 0.6s ease}
+.bpct{width:38px;font-size:12px;font-weight:700;text-align:right;flex-shrink:0}
+.bst{width:22px;font-size:13px;text-align:right;flex-shrink:0}
+.ib{border-radius:var(--r);padding:14px;margin-top:14px}
+.ib.warn{background:#fff8f0;border:1px solid #f0d0a0}.ib.ok{background:#f0faf0;border:1px solid #b0d8b0}
+.ib.plain{background:#fff;border:1px solid var(--border)}
+.it{font-family:'Noto Serif TC',serif;font-size:14px;font-weight:700;color:var(--dk);margin-bottom:9px}
+.ii{font-size:12px;color:var(--mid);margin-bottom:6px;line-height:1.6}
+.ftags{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.ftag{background:#e8f0e0;color:#4a6e3e;border-radius:12px;padding:3px 9px;font-size:11px}
+.nutrient-status-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px}
+.ns-chip{font-size:10px;padding:3px 8px;border-radius:10px;font-weight:600}
+.ns-chip.low{background:#fdecea;color:var(--red)}.ns-chip.mid{background:#fff3e0;color:var(--orange)}.ns-chip.ok{background:#e8f5e9;color:var(--green)}
+.food-picker-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.fp-item{background:#f9f4ee;border-radius:10px;padding:10px 8px;cursor:pointer;border:2px solid transparent;transition:all 0.2s;text-align:center;user-select:none}
+.fp-item:active{transform:scale(0.96)}.fp-item.recommended{background:#e8f5e9;border-color:var(--sage)}
+.fp-item.selected{background:var(--gold-l);border-color:var(--gold)}
+.fp-emoji{font-size:22px;margin-bottom:4px}.fp-name{font-size:12px;font-weight:600;color:var(--dk)}
+.fp-nut{font-size:10px;color:var(--gold);margin-top:2px}
+.fp-rec-badge{font-size:9px;background:var(--sage);color:#fff;border-radius:6px;padding:1px 5px;margin-top:3px;display:inline-block}
+.fp-warn{font-size:9px;color:var(--red);margin-top:2px}
+.section-label{font-size:12px;font-weight:700;color:var(--mid);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.section-label .badge{background:var(--gold);color:#fff;border-radius:10px;padding:2px 8px;font-size:10px}
+.section-label .badge.sage{background:var(--sage)}
+.selected-meal{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px;min-height:36px;padding:8px;background:#f9f4ee;border-radius:10px;border:1px dashed var(--border)}
+.sel-chip{display:flex;align-items:center;gap:5px;background:var(--gold-l);border:1px solid var(--gold);border-radius:20px;padding:5px 10px;font-size:12px;font-weight:600;cursor:pointer}
+.sel-chip .rm{color:var(--gold);font-size:14px;line-height:1}
+.sel-empty{font-size:12px;color:#bbb;align-self:center}
+.meal-result{background:var(--warm);border-radius:var(--r);border:2px solid var(--gold);padding:14px;animation:fadeIn 0.3s ease;margin-top:10px}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.mr-title{font-family:'Noto Serif TC',serif;font-size:15px;font-weight:700;color:var(--dk);margin-bottom:10px}
+.mr-food{display:flex;align-items:center;gap:9px;padding:8px 11px;background:#f9f4ee;border-radius:9px;margin-bottom:7px}
+.mr-fname{font-weight:600;font-size:13px}.mr-portion{font-size:11px;color:var(--gold);margin-left:auto}.mr-tex{font-size:10px;color:#aaa;margin-left:7px}
+.mr-nut-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:10px 0}
+.mr-nut{background:#f5ede0;border-radius:8px;padding:7px 9px;font-size:11px;display:flex;justify-content:space-between}
+.mr-nl{color:var(--mid)}.mr-nv{font-weight:600;color:var(--dk)}
+.mr-note{font-size:11px;color:var(--peach);background:#fff8f0;border-radius:8px;padding:8px 11px;margin-top:7px;line-height:1.5}
+.mr-cook{font-size:11px;color:var(--mid);font-style:italic;margin-top:8px}
+.mr-week{font-size:11px;color:var(--mid);background:#f0f4ff;border-radius:8px;padding:8px 11px;margin-top:7px;line-height:1.6}
+.action-btns{display:flex;gap:9px;margin-top:10px}
+.btn-primary{flex:1;background:var(--gold);color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Serif TC',serif}
+.btn-primary:active{background:#e8a85a}
+.btn-sec{flex:1;background:#f0e8d8;color:var(--mid);border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Noto Sans TC',sans-serif}
+.gg{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:18px}
+.gcard{background:var(--warm);border-radius:10px;padding:11px;border:1px solid var(--border)}
+.gcn{font-size:14px;font-weight:700;color:var(--dk);margin-bottom:3px}.gctex{font-size:10px;color:var(--gold);margin-bottom:6px}
+.gnr{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:5px}.gntag{font-size:9px;background:#f0e8d8;color:var(--mid);border-radius:7px;padding:2px 6px}
+.gcnote{font-size:10px;color:var(--lt);line-height:1.4}
+.rb{background:#fff8f0;border:1px solid #f0d0a0;border-radius:var(--r);padding:14px}
+.ri{font-size:12px;color:var(--mid);margin-bottom:8px;line-height:1.6;padding-left:14px;position:relative}
+.ri::before{content:"•";position:absolute;left:0;color:var(--gold)}
+.share-btn{position:fixed;bottom:18px;right:16px;background:var(--sage);color:#fff;border:none;border-radius:50px;padding:11px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Serif TC',serif;box-shadow:0 4px 16px rgba(122,158,126,0.4);z-index:200}
+.share-btn:active{transform:scale(0.96)}
+.share-bar{background:var(--warm);border-radius:var(--r);border:2px solid var(--sage);padding:14px;margin-top:14px;animation:fadeIn 0.3s ease}
+.share-title{font-family:'Noto Serif TC',serif;font-size:13px;font-weight:700;color:var(--dk);margin-bottom:9px}
+.share-text{width:100%;background:#f5ede0;border:none;border-radius:10px;padding:11px;font-family:'Noto Sans TC',sans-serif;font-size:12px;color:var(--dk);line-height:1.7;resize:none;min-height:110px}
+.share-copy{width:100%;background:var(--sage);color:#fff;border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Serif TC',serif;margin-top:9px}
+.share-copy.copied{background:#4caf50}
+.share-toast{position:fixed;bottom:75px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:9px 18px;border-radius:18px;font-size:12px;z-index:300;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap}
+.share-toast.show{opacity:1}
+.about-card{background:var(--warm);border-radius:var(--r);border:1px solid var(--border);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+.about-title{font-family:'Noto Serif TC',serif;font-size:14px;font-weight:700;color:var(--dk);margin-bottom:9px}
+.about-item{font-size:12px;color:var(--mid);margin-bottom:7px;line-height:1.7;padding-left:14px;position:relative}
+.about-item::before{content:"→";position:absolute;left:0;color:var(--gold)}
+.about-code{background:#f5ede0;border-radius:8px;padding:9px 11px;font-size:11px;font-family:monospace;color:var(--mid);margin:7px 0;line-height:1.8;word-break:break-all}
+.update-btn{background:#f5ede0;color:var(--mid);border:1px solid var(--border);border-radius:10px;padding:8px 14px;font-size:12px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;margin-top:7px}
+/* THEME BUTTONS */
+.theme-btn-row{display:flex;flex-wrap:wrap;gap:7px}
+.theme-btn{background:#fff;border:1.5px solid;border-radius:20px;padding:6px 12px;cursor:pointer;font-size:12px;font-family:'Noto Sans TC',sans-serif;font-weight:600;transition:all 0.2s;white-space:nowrap}
+.theme-btn:active{opacity:0.8;transform:scale(0.97)}
+/* THEME RESULT */
+.theme-result-card{border-radius:var(--r);border:2px solid;padding:14px;margin-bottom:12px;animation:fadeIn 0.3s ease}
+.theme-result-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+.theme-result-icon{font-size:24px;flex-shrink:0}
+.theme-result-title{font-family:'Noto Serif TC',serif;font-size:14px;font-weight:700;color:var(--dk)}
+.theme-result-desc{font-size:11px;color:var(--mid);margin-top:2px}
+.theme-result-close{margin-left:auto;background:none;border:none;font-size:18px;color:#aaa;cursor:pointer;padding:0;line-height:1;flex-shrink:0}
+.theme-result-foods{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
+.theme-food-chip{display:flex;flex-direction:column;align-items:center;background:#fff;border-radius:10px;padding:8px 10px;font-size:13px;font-weight:600;color:var(--dk);min-width:64px;text-align:center}
+.theme-food-unit{font-size:10px;color:var(--lt);font-weight:400;margin-top:2px}
+.theme-result-nut{font-size:11px;color:var(--mid);padding:7px 10px;background:rgba(255,255,255,0.6);border-radius:8px;margin-bottom:7px}
+.theme-result-reasons{font-size:11px;color:var(--mid);font-style:italic;line-height:1.6}
+.theme-apply-note{font-size:11px;color:var(--sage);margin:6px 0 4px;font-style:italic}
+
+/* ══ LAB STYLES ══ */
+.lab-section-title{font-family:'Noto Serif TC',serif;font-size:14px;font-weight:700;color:var(--dk);margin-bottom:10px}
+.lab-meta-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.lab-meta-chip{font-size:11px;background:#f5ede0;color:var(--mid);border-radius:10px;padding:3px 9px}
+.cat-balance-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.cat-chip{font-size:11px;border-radius:10px;padding:3px 9px;font-weight:600}
+.lab-nut-row{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.lab-nut-label{width:55px;font-size:11px;font-weight:600;color:var(--dk);flex-shrink:0}
+.lab-nut-bar-wrap{flex:1;height:11px;background:#e8e0d0;border-radius:6px;overflow:hidden}
+.lab-nut-bar{height:100%;border-radius:6px;transition:width 0.5s ease}
+.lab-nut-val{width:52px;font-size:11px;color:var(--dk);text-align:right;flex-shrink:0}
+.lab-nut-pct{width:32px;font-size:11px;font-weight:700;text-align:right;flex-shrink:0}
+.combo-tags-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.combo-tag{font-size:11px;border:1.5px solid;border-radius:12px;padding:3px 10px;font-weight:600}
+.combo-comment{border-left:3px solid;padding:9px 11px;margin-bottom:8px;background:#fafaf8;border-radius:0 8px 8px 0}
+.combo-comment-tag{font-size:11px;font-weight:700;margin-bottom:4px}
+.combo-comment-text{font-size:12px;color:var(--mid);line-height:1.6}
+.food-note-item{display:flex;flex-direction:column;gap:3px;padding:9px 0;border-bottom:1px solid var(--border)}
+.food-note-item:last-child{border-bottom:none}
+.food-note-name{font-size:13px;font-weight:700;color:var(--dk)}
+.food-note-text{font-size:12px;color:var(--mid);line-height:1.6}
+.lab-warnings{margin-top:10px;padding:9px 11px;background:#fff8f0;border-radius:8px;border:1px solid #f0d0a0}
+.lab-warn-item{font-size:12px;color:var(--mid);margin-bottom:5px;line-height:1.5}
+.lab-warn-item:last-child{margin-bottom:0}
+.cook-item{display:flex;align-items:baseline;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
+.cook-item:last-child{border-bottom:none}
+.cook-name{font-weight:700;color:var(--dk);flex-shrink:0;width:60px}
+.cook-method{color:var(--mid)}
+
+/* ══ GUIDE V2 STYLES ══ */
+.guide-cards-list{display:flex;flex-direction:column;gap:12px;margin-top:4px}
+.guide-card-v2{background:var(--warm);border-radius:var(--r);border:1px solid var(--border);padding:14px;box-shadow:var(--shadow)}
+.guide-card-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+.guide-card-emoji{font-size:28px;flex-shrink:0}
+.guide-card-title-area{flex:1}
+.guide-card-name{font-family:'Noto Serif TC',serif;font-size:16px;font-weight:700;color:var(--dk)}
+.guide-card-sub{font-size:11px;color:var(--lt);margin-top:2px}
+.guide-first-badge{font-size:10px;background:#e8f5e9;color:#2e7d32;border-radius:10px;padding:3px 8px;font-weight:700;flex-shrink:0}
+.guide-nut-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.guide-nut-chip{font-size:10px;border-radius:8px;padding:2px 8px;font-weight:600}
+.guide-nut-chip.iron{background:#fdecea;color:#c0392b}
+.guide-nut-chip.ca{background:#e8f4f8;color:#1565c0}
+.guide-nut-chip.pro{background:#f3e5f5;color:#6a1b9a}
+.guide-nut-chip.dha{background:#e3f2fd;color:#1a6ca8}
+.guide-nut-chip.vitd{background:#fff8e1;color:#f57f17}
+.guide-nut-chip.vitc{background:#f9fbe7;color:#558b2f}
+.guide-nut-chip.fib{background:#e8f5e9;color:#2e7d32}
+.guide-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+.guide-info-item{background:#f9f4ee;border-radius:8px;padding:6px 9px;display:flex;flex-direction:column;gap:2px}
+.guide-info-label{font-size:10px;color:var(--lt)}
+.guide-info-val{font-size:12px;font-weight:600;color:var(--dk)}
+.guide-section-label{font-size:11px;font-weight:700;color:var(--mid);margin:8px 0 5px}
+.guide-tags-row{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px}
+.guide-cook-tag{font-size:10px;background:#f0e8d8;color:var(--mid);border-radius:8px;padding:2px 8px}
+.guide-pair-tag{font-size:10px;background:#e8f0e0;color:#4a6e3e;border-radius:8px;padding:2px 8px}
+.guide-commentary{font-size:12px;color:var(--mid);line-height:1.7;background:#f9f4ee;border-radius:8px;padding:9px 11px;margin-bottom:6px}
+.guide-intro-note{font-size:11px;color:var(--sage);background:#e8f5e9;border-radius:8px;padding:7px 10px;margin-top:6px;line-height:1.5}
+.guide-caution{font-size:11px;color:#e07030;background:#fff8f0;border-radius:8px;padding:7px 10px;margin-top:6px;line-height:1.5}
+.theme-food-name{font-size:12px;font-weight:700;color:var(--dk);margin-top:3px}
+.theme-food-nut{font-size:10px;color:var(--gold);margin-top:1px}
+.theme-btn-active{font-weight:700}
+.swap-unit{font-size:9px;color:var(--lt);margin-top:1px}
+/* SWAP PICKER */
+.food-top-row{display:flex;justify-content:space-between;align-items:flex-start}
+.swap-btn{background:var(--gold-l);border:1px solid var(--gold);border-radius:8px;width:28px;height:28px;cursor:pointer;font-size:14px;color:var(--gold);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:4px;transition:all 0.2s}
+.swap-btn:active{background:var(--gold);color:#fff}
+.swap-picker{margin-top:10px;background:#f0f8f0;border-radius:10px;border:1px solid var(--sage);padding:10px;animation:fadeIn 0.2s ease}
+.swap-title{font-size:11px;font-weight:700;color:var(--sage);margin-bottom:8px}
+.swap-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}
+.swap-item{background:#fff;border-radius:8px;padding:7px 5px;cursor:pointer;border:1px solid var(--border);text-align:center;transition:all 0.15s}
+.swap-item:active{background:var(--sage-l);border-color:var(--sage)}
+.swap-emoji{font-size:18px;margin-bottom:2px}
+.swap-name{font-size:11px;font-weight:600;color:var(--dk)}
+.swap-nut{font-size:9px;color:var(--gold);margin-top:1px}
+.swap-reason{font-size:9px;color:#5a8a5a;margin-top:2px;line-height:1.3}
+.swap-warn{font-size:9px;color:#e05050;margin-top:2px;line-height:1.3}
+.swap-cancel{width:100%;background:#f5ede0;border:none;border-radius:7px;padding:6px;font-size:11px;color:var(--mid);cursor:pointer;font-family:'Noto Sans TC',sans-serif}
+.meal-nut-bar{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;padding:7px 10px;background:#f5ede0;border-radius:8px;font-size:11px;color:var(--mid)}
+
+/* PULL TO REFRESH */
+#ptr-indicator{
+  position:fixed;top:0;left:50%;transform:translateX(-50%) translateY(-60px);
+  background:var(--gold);color:#fff;border-radius:0 0 20px 20px;
+  padding:8px 20px;font-size:13px;font-family:'Noto Sans TC',sans-serif;
+  font-weight:600;z-index:500;transition:transform 0.2s ease;
+  pointer-events:none;white-space:nowrap;box-shadow:0 4px 12px rgba(200,147,74,0.4);
+}
+#ptr-indicator.visible{transform:translateX(-50%) translateY(0);}
+#ptr-indicator.loading{transform:translateX(-50%) translateY(0);background:var(--sage);}
+</style>
+</head>
+<body>
+<div id="ptr-indicator">↓ 放開以重新整理</div>
+<header>
+  <div class="hd">
+    <div class="logo"><div class="logo-icon">🐟</div>
+      <div><div class="logo-title">魚魚副食品食材配對工具</div><div class="logo-sub">10個月 · 智能動態配搭系統</div></div>
+    </div>
+    <div class="save-dot" id="save-dot"></div>
+  </div>
+  <nav>
+    <button class="nb active" data-tab="weekly">📅 本週餐單</button>
+    <button class="nb" data-tab="dynamic">🧩 動態配搭</button>
+    <button class="nb" data-tab="tracker">📊 營養追蹤</button>
+    <button class="nb" data-tab="guide">📋 食材指引</button>
+    <button class="nb" data-tab="about">ℹ️ 說明</button>
+  </nav>
+</header>
+<main id="mc"></main>
+<button class="share-btn" id="share-fab">📤 分享今日記錄</button>
+<div class="share-toast" id="share-toast">已複製！貼到群組即可 ✓</div>
+<script>
+const FOODS={
+  牛肉末:{cat:"protein",emoji:"🥩",unit:"約1.5湯匙",iron:2.6,zinc:4.8,vitD:0,calcium:6,protein:26,dha:0,fiber:0,vitC:0,vitA:0,vitB12:2.8,folate:9,p:30,tex:"碎粒",absorb:"heme",digest:2,allergen:[],vitC_boost:false,pairs:["番茄","菠菜","莧菜","南瓜","紅蘿蔔","地瓜","馬鈴薯"],avoid:[],n:"補鐵首選，動物性鐵吸收率高達25%"},
+  豬肉末:{cat:"protein",emoji:"🥩",unit:"約1.5湯匙",iron:1.0,zinc:2.9,vitD:0,calcium:6,protein:27,dha:0,fiber:0,vitC:0,vitA:0,vitB12:0.7,folate:6,p:30,tex:"碎粒",absorb:"heme",digest:2,allergen:[],vitC_boost:false,pairs:["南瓜","紅蘿蔔","軟飯","地瓜","菠菜"],avoid:[],n:""},
+  雞腿肉:{cat:"protein",emoji:"🍗",unit:"約3-4小片",iron:1.3,zinc:2.0,vitD:0,calcium:11,protein:27,dha:0,fiber:0,vitC:0,vitA:15,vitB12:0.3,folate:7,p:30,tex:"碎粒/手指食物",absorb:"heme",digest:2,allergen:[],vitC_boost:false,pairs:["莧菜","菇類","南瓜","紅蘿蔔","地瓜"],avoid:[],n:"深色肉鐵質較高，比雞胸肉高50%"},
+  豬肝:{cat:"protein",emoji:"🫀",unit:"約1小片（拇指大）",iron:13,zinc:4.0,vitD:1.2,calcium:5,protein:21,dha:0,fiber:0,vitC:20,vitA:6500,vitB12:18,folate:212,p:20,tex:"泥狀",absorb:"heme",digest:3,allergen:[],vitC_boost:false,pairs:["菠菜","莧菜","軟飯","雪梨"],avoid:[],n:"⚠️ 每週不超過2次，維A含量極高，葉酸豐富"},
+  鮭魚:{cat:"protein",emoji:"🐟",unit:"約1小塊（手掌1/3）",iron:0.8,zinc:0.6,vitD:11,calcium:12,protein:25,dha:2200,fiber:0,vitC:3,vitA:12,vitB12:3.2,folate:26,p:30,tex:"碎粒/手指食物",absorb:"heme",digest:2,allergen:["魚"],vitC_boost:false,pairs:["南瓜","菠菜","莧菜","地瓜","菇類"],avoid:[],n:"DHA首選，維D豐富，去骨後壓碎"},
+  白魚肉:{cat:"protein",emoji:"🐠",unit:"約1小塊",iron:0.4,zinc:0.4,vitD:2,calcium:16,protein:19,dha:300,fiber:0,vitC:0,vitA:10,vitB12:1.2,folate:14,p:30,tex:"碎粒",absorb:"heme",digest:1,allergen:["魚"],vitC_boost:false,pairs:["紅蘿蔔","南瓜","軟飯","地瓜"],avoid:[],n:"低過敏，消化最易，適合初試海鮮"},
+  雞蛋:{cat:"protein",emoji:"🥚",unit:"約1隻（中型）",iron:1.8,zinc:1.1,vitD:2,calcium:50,protein:13,dha:100,fiber:0,vitC:0,vitA:140,vitB12:0.9,folate:44,p:50,tex:"蒸蛋/炒蛋",absorb:"non-heme",digest:1,allergen:["蛋"],vitC_boost:false,pairs:["番茄","菠菜","南瓜","菇類","豆腐"],avoid:[],n:"卵磷脂促進腦部發育，營養完整"},
+  板豆腐:{cat:"protein",emoji:"🫙",unit:"約2-3小塊",iron:1.5,zinc:0.6,vitD:0,calcium:350,protein:8,dha:0,fiber:0.3,vitC:0,vitA:0,vitB12:0,folate:15,p:50,tex:"碎粒/手指食物",absorb:"non-heme",digest:1,allergen:["大豆"],vitC_boost:false,pairs:["番茄","菠菜","莧菜","菇類"],avoid:[],n:"鈣質極高，每100g含350mg"},
+  蝦仁:{cat:"protein",emoji:"🍤",unit:"約3-4隻",iron:1.1,zinc:1.1,vitD:0,calcium:54,protein:18,dha:500,fiber:0,vitC:0,vitA:0,vitB12:1.0,folate:38,p:25,tex:"泥狀/碎粒",absorb:"heme",digest:2,allergen:["甲殼類"],vitC_boost:false,pairs:["南瓜","紅蘿蔔","軟飯"],avoid:[],n:"⚠️ 高過敏，初次給極少量"},
+  菠菜:{cat:"veg",emoji:"🥬",unit:"約4-5棵",iron:2.7,zinc:0.5,vitD:0,calcium:99,protein:2.9,dha:0,fiber:2.2,vitC:28,vitA:469,vitB12:0,folate:194,p:25,tex:"泥狀/碎粒",absorb:"non-heme",digest:2,allergen:[],vitC_boost:true,pairs:["牛肉末","豬肝","雞蛋","番茄"],avoid:[],n:"植物性鐵+維C，葉酸豐富，草酸較高需適量"},
+  莧菜:{cat:"veg",emoji:"🥬",unit:"約4-5棵",iron:2.5,zinc:0.6,vitD:0,calcium:180,protein:2.5,dha:0,fiber:2,vitC:43,vitA:292,vitB12:0,folate:85,p:25,tex:"泥狀/碎粒",absorb:"non-heme",digest:2,allergen:[],vitC_boost:true,pairs:["鮭魚","雞腿肉","牛肉末"],avoid:[],n:"鐵+鈣雙高，維C促鐵吸收，優於菠菜"},
+  南瓜:{cat:"veg",emoji:"🎃",unit:"約3-4小塊",iron:0.8,zinc:0.1,vitD:0,calcium:21,protein:1,dha:0,fiber:0.5,vitC:9,vitA:426,vitB12:0,folate:16,p:30,tex:"泥狀/手指食物",absorb:"non-heme",digest:1,allergen:[],vitC_boost:false,pairs:["牛肉末","鮭魚","雞蛋","豬肉末"],avoid:[],n:"β-胡蘿蔔素豐富，甜味高，接受度極佳"},
+  紅蘿蔔:{cat:"veg",emoji:"🥕",unit:"約半條",iron:0.3,zinc:0.2,vitD:0,calcium:33,protein:0.9,dha:0,fiber:2.8,vitC:6,vitA:835,vitB12:0,folate:19,p:30,tex:"泥狀/手指食物",absorb:"non-heme",digest:1,allergen:[],vitC_boost:false,pairs:["雞腿肉","白魚肉","豬肉末"],avoid:[],n:"β-胡蘿蔔素極豐富，需油脂促吸收"},
+  番茄:{cat:"veg",emoji:"🍅",unit:"約半個",iron:0.3,zinc:0.2,vitD:0,calcium:10,protein:0.9,dha:0,fiber:1.2,vitC:23,vitA:42,vitB12:0,folate:15,p:30,tex:"泥狀/碎粒",absorb:"non-heme",digest:1,allergen:[],vitC_boost:true,pairs:["牛肉末","雞蛋","板豆腐"],avoid:[],n:"維C促鐵吸收首選，茄紅素抗氧化"},
+  菇類:{cat:"veg",emoji:"🍄",unit:"約3-4朵",iron:0.5,zinc:0.5,vitD:5,calcium:3,protein:3,dha:0,fiber:2,vitC:2,vitA:0,vitB12:0,folate:17,p:25,tex:"碎粒",absorb:"non-heme",digest:2,allergen:[],vitC_boost:false,pairs:["雞蛋","雞腿肉","板豆腐"],avoid:[],n:"日曬香菇維D高（可達10-20mcg）"},
+  西蘭花:{cat:"veg",emoji:"🥦",unit:"約3-4小朵",iron:0.7,zinc:0.4,vitD:0,calcium:47,protein:2.8,dha:0,fiber:2.6,vitC:89,vitA:31,vitB12:0,folate:63,p:25,tex:"泥狀/碎粒",absorb:"non-heme",digest:2,allergen:[],vitC_boost:true,pairs:["雞蛋","板豆腐","雞腿肉"],avoid:[],n:"維C含量極高（89mg/100g），鈣質豐富"},
+  地瓜葉:{cat:"veg",emoji:"🌿",unit:"約5-6棵",iron:2.5,zinc:0.3,vitD:0,calcium:65,protein:3,dha:0,fiber:3.3,vitC:55,vitA:380,vitB12:0,folate:41,p:25,tex:"泥狀",absorb:"non-heme",digest:2,allergen:[],vitC_boost:true,pairs:["牛肉末","雞腿肉"],avoid:[],n:"鐵質豐富，維C高，性質溫和"},
+  軟飯:{cat:"carb",emoji:"🍚",unit:"約半小碗",iron:0.1,zinc:0.6,vitD:0,calcium:2,protein:2.7,dha:0,fiber:0.2,vitC:0,vitA:0,vitB12:0,folate:8,p:80,tex:"軟飯",absorb:"non-heme",digest:1,allergen:[],vitC_boost:false,pairs:["所有食材"],avoid:[],n:"最易消化主食"},
+  地瓜:{cat:"carb",emoji:"🍠",unit:"約半條",iron:0.6,zinc:0.3,vitD:0,calcium:30,protein:1.6,dha:0,fiber:3,vitC:20,vitA:709,vitB12:0,folate:11,p:70,tex:"泥狀/手指食物",absorb:"non-heme",digest:1,allergen:[],vitC_boost:true,pairs:["鮭魚","雞腿肉","莧菜","菠菜"],avoid:[],n:"β-胡蘿蔔素及維C豐富，天然甜味"},
+  馬鈴薯:{cat:"carb",emoji:"🥔",unit:"約半個",iron:0.8,zinc:0.3,vitD:0,calcium:12,protein:2,dha:0,fiber:2.2,vitC:20,vitA:2,vitB12:0,folate:16,p:70,tex:"泥狀",absorb:"non-heme",digest:1,allergen:[],vitC_boost:true,pairs:["牛肉末","豬肉末","番茄"],avoid:[],n:"維C含量不低，鉀質豐富"},
+  燕麥粥:{cat:"carb",emoji:"🥣",unit:"約半小碗",iron:2.0,zinc:1.9,vitD:0,calcium:52,protein:5,dha:0,fiber:4,vitC:0,vitA:0,vitB12:0,folate:26,p:60,tex:"粥狀",absorb:"non-heme",digest:1,allergen:[],vitC_boost:false,pairs:["香蕉","蘋果","雞蛋","牛油果"],avoid:[],n:"植物性鐵較高，膳食纖維豐富"},
+  藜麥粥:{cat:"carb",emoji:"🌾",unit:"約半小碗",iron:1.5,zinc:1.1,vitD:0,calcium:17,protein:4.4,dha:0,fiber:2.8,vitC:0,vitA:0,vitB12:0,folate:42,p:60,tex:"粥狀",absorb:"non-heme",digest:2,allergen:[],vitC_boost:false,pairs:["雞蛋","牛油果","雞腿肉"],avoid:[],n:"完整蛋白質含所有必需氨基酸"},
+  香蕉:{cat:"fruit",emoji:"🍌",unit:"約半條",iron:0.3,zinc:0.2,vitD:0,calcium:5,protein:1.1,dha:0,fiber:2.6,vitC:9,vitA:3,vitB12:0,folate:20,p:40,tex:"手指食物",absorb:"non-heme",digest:1,allergen:[],vitC_boost:false,pairs:["燕麥粥","雞蛋","牛油果"],avoid:[],n:"鉀質豐富，天然甜味，消化最易"},
+  蘋果:{cat:"fruit",emoji:"🍎",unit:"約1/4個",iron:0.1,zinc:0.0,vitD:0,calcium:6,protein:0.3,dha:0,fiber:2.4,vitC:5,vitA:3,vitB12:0,folate:3,p:40,tex:"蒸軟後手指食物",absorb:"non-heme",digest:1,allergen:[],vitC_boost:false,pairs:["牛肉末","燕麥粥"],avoid:[],n:"槲皮素抗氧化，果膠助消化"},
+  雪梨:{cat:"fruit",emoji:"🍐",unit:"約1/4個",iron:0.2,zinc:0.1,vitD:0,calcium:9,protein:0.4,dha:0,fiber:3.1,vitC:4,vitA:1,vitB12:0,folate:7,p:40,tex:"蒸軟/手指食物",absorb:"non-heme",digest:1,allergen:[],vitC_boost:false,pairs:["豬肝","豬肉末","燕麥粥"],avoid:[],n:"潤腸通便，適合便秘期"},
+  牛油果:{cat:"fruit",emoji:"🥑",unit:"約1/4個",iron:0.6,zinc:0.6,vitD:0,calcium:12,protein:2,dha:0,fiber:6.7,vitC:10,vitA:7,vitB12:0,folate:81,p:40,tex:"手指食物",absorb:"non-heme",digest:1,allergen:[],vitC_boost:false,pairs:["雞蛋","燕麥粥","香蕉","鮭魚"],avoid:[],n:"健康脂肪，葉酸極豐富，促脂溶性維素吸收"},
+  奇異果:{cat:"fruit",emoji:"🥝",unit:"約半個",iron:0.3,zinc:0.1,vitD:0,calcium:34,protein:1.1,dha:0,fiber:3,vitC:93,vitA:4,vitB12:0,folate:25,p:40,tex:"泥狀/手指食物",absorb:"non-heme",digest:1,allergen:[],vitC_boost:true,pairs:["牛肉末","燕麥粥","板豆腐"],avoid:[],n:"維C含量極高（93mg），促鐵吸收最強水果"},
+  木瓜:{cat:"fruit",emoji:"🍈",unit:"約2-3小塊",iron:0.3,zinc:0.1,vitD:0,calcium:20,protein:0.5,dha:0,fiber:1.8,vitC:60,vitA:47,vitB12:0,folate:37,p:40,tex:"泥狀/手指食物",absorb:"non-heme",digest:1,allergen:[],vitC_boost:true,pairs:["雞腿肉","白魚肉"],avoid:[],n:"木瓜酵素助蛋白質消化，維C豐富"},
+  芝麻糊:{cat:"fat",emoji:"⚫",unit:"約1茶匙",iron:5.0,zinc:2.8,vitD:0,calcium:975,protein:18,dha:0,fiber:12,vitC:0,vitA:0,vitB12:0,folate:97,p:15,tex:"糊狀（1茶匙）",absorb:"non-heme",digest:2,allergen:["芝麻"],vitC_boost:false,pairs:["軟飯","燕麥粥"],avoid:[],n:"少量使用（約1茶匙），鈣鐵含量驚人"}
+};
+
+// ══════════════════════════════════════════════════════════════════════
+// ██ EXTENDED FOOD KNOWLEDGE DATABASE ██
+// 可長期擴充的食材知識庫
+// ══════════════════════════════════════════════════════════════════════
+const FOODS_EXT = {
+  牛肉末: {
+    minAge: 6,           // 最早引入月齡
+    cookMethods: ["蒸熟","煮熟","炒熟（不加油鹽）"],
+    firstIntro: false,   // 是否適合作為初次引入食材
+    firstIntroNote: "蛋白質食材，建議6個月後從白魚肉或雞肉開始",
+    digestNote: "消化中等，熟透後較易消化",
+    allergenRisk: "低",
+    weeklyMax: 4,
+    commentary: {
+      solo: "牛肉末是最佳補鐵選擇之一，動物性鐵（血鐵素鐵）的吸收率高達25%，遠超植物性鐵。建議每週出現3-4次。",
+      withVitC: "配搭含維C食材時，即使是非血鐵素鐵的吸收率也可提升至接近動物性鐵水平。",
+      withLeafyVeg: "搭配深綠色蔬菜，可同時提供動物性鐵和植物性鐵，雙重補鐵效果。",
+      caution: "確保完全熟透，不應帶血色。份量每次30g（約1.5湯匙）即可。"
+    }
+  },
+  豬肉末: {
+    minAge: 6,
+    cookMethods: ["蒸熟","煮熟"],
+    firstIntro: false,
+    firstIntroNote: "建議先引入雞肉或白魚",
+    digestNote: "消化中等",
+    allergenRisk: "低",
+    weeklyMax: 3,
+    commentary: {
+      solo: "豬肉末蛋白質豐富，鋅含量高，有助免疫系統及生長發育。鐵質含量雖不及牛肉，但仍屬動物性鐵，吸收效率好。",
+      withVitC: "搭配維C食材可提升鐵質吸收效率。",
+      caution: "確保完全熟透。"
+    }
+  },
+  雞腿肉: {
+    minAge: 6,
+    cookMethods: ["蒸熟","煮熟","煮湯"],
+    firstIntro: true,
+    firstIntroNote: "適合作為初次引入肉類，口感軟嫩，過敏風險低",
+    digestNote: "消化較易，深色肉優於雞胸",
+    allergenRisk: "低",
+    weeklyMax: 4,
+    commentary: {
+      solo: "雞腿肉是引入肉類的好起點，深色肉部份含鐵量較雞胸高約50%。蒸熟壓碎後質地適合嬰兒。",
+      withVeg: "搭配莧菜、西蘭花等蔬菜，提供動物性鐵+植物性鐵雙重來源，同時補充維C促進吸收。",
+      caution: "去皮去骨，確保熟透。"
+    }
+  },
+  豬肝: {
+    minAge: 6,
+    cookMethods: ["蒸熟","煮熟"],
+    firstIntro: false,
+    firstIntroNote: "不建議作為初次引入食材，建議先建立多種肉類耐受後再引入",
+    digestNote: "消化中等，氣味較重，部分嬰兒需時間適應",
+    allergenRisk: "低",
+    weeklyMax: 2,
+    commentary: {
+      solo: "豬肝是所有嬰兒食材中鐵質含量最高的選擇，每100g含鐵13mg，遠超其他食材。同時富含葉酸（212mcg/100g）及維B12，對神經發育極為重要。",
+      withLeafyVeg: "搭配菠菜或莧菜，提供多種形式的鐵質，但注意草酸可能影響部分礦物質吸收。",
+      caution: "⚠️ 每週嚴格限制2次，每次20g（約拇指大小）。維他命A含量極高（6500mcg RE/100g），過量攝取有中毒風險。購買時選擇新鮮、顏色均勻的豬肝。"
+    }
+  },
+  鮭魚: {
+    minAge: 6,
+    cookMethods: ["蒸熟","煮熟"],
+    firstIntro: false,
+    firstIntroNote: "魚類建議從白魚開始，再引入脂肪較多的鮭魚",
+    digestNote: "消化良好，脂肪含量較高但為健康脂肪",
+    allergenRisk: "中（魚類過敏）",
+    weeklyMax: 3,
+    commentary: {
+      solo: "鮭魚是DHA最豐富的食材之一，每100g含DHA 2200mg，對腦部及視力發育至關重要。同時富含維他命D（11mcg/100g），協助鈣質吸收。",
+      withGreenVeg: "搭配莧菜或菠菜，DHA促進神經發育，同時補充植物性鐵，是最強腦力組合之一。",
+      withVitC: "搭配維C食材（如奇異果）可提升隨餐的鐵質吸收效率。",
+      caution: "必須去骨，蒸熟後壓成細碎。初次引入觀察3天。建議每週出現2-3次。"
+    }
+  },
+  白魚肉: {
+    minAge: 4,
+    cookMethods: ["蒸熟","煮熟","清蒸"],
+    firstIntro: true,
+    firstIntroNote: "最適合作為初次引入海鮮的選擇，低脂低過敏",
+    digestNote: "消化極易，是所有蛋白質食材中最易消化的",
+    allergenRisk: "低中（魚類）",
+    weeklyMax: 4,
+    commentary: {
+      solo: "白魚肉（如鱈魚、龍利魚）是引入海鮮蛋白質的最佳起點。質地細嫩，消化負擔最低，過敏風險相對較低。DHA含量雖不及鮭魚，但對初次嘗試海鮮的嬰兒非常適合。",
+      withVeg: "搭配根莖類蔬菜（紅蘿蔔、南瓜），提供均衡的蛋白質及維他命A組合。",
+      caution: "去骨去皮，蒸熟後壓碎。若有魚類家族過敏史，先諮詢醫生。"
+    }
+  },
+  雞蛋: {
+    minAge: 6,
+    cookMethods: ["蒸蛋","炒蛋（不加油鹽）","水煮"],
+    firstIntro: false,
+    firstIntroNote: "建議從蛋黃開始（4-6個月），確認耐受後再全蛋",
+    digestNote: "消化良好，蛋黃比蛋白更易消化",
+    allergenRisk: "高（八大過敏原之一）",
+    weeklyMax: 7,
+    commentary: {
+      solo: "雞蛋是「完全蛋白質」來源，含所有必需氨基酸。蛋黃富含卵磷脂，對腦部及神經系統發育尤為重要。維D及DHA含量亦有助骨骼發育。",
+      withVeg: "搭配番茄，維C促進鐵質吸收（蛋黃含1.8mg鐵/100g），同時增加風味。",
+      withTofu: "雞蛋+豆腐的組合，提供動物性及植物性蛋白雙重來源，鈣質豐富。",
+      caution: "⚠️ 雞蛋是高過敏原食材。首次引入從少量蛋黃開始，觀察5天再增加份量。若出現皮疹、嘔吐等反應立即停止。確保熟透，不可給生蛋。"
+    }
+  },
+  板豆腐: {
+    minAge: 6,
+    cookMethods: ["蒸熟","煮熟","壓碎"],
+    firstIntro: true,
+    firstIntroNote: "適合作為初次引入植物性蛋白的選擇",
+    digestNote: "消化極易",
+    allergenRisk: "中（大豆過敏）",
+    weeklyMax: 5,
+    commentary: {
+      solo: "板豆腐是植物性食材中鈣質含量最高的選擇之一（350mg/100g），超過很多乳製品。同時提供優質植物性蛋白，適合作為肉類的補充或替代。",
+      withTomato: "搭配番茄（含維C），有助提升豆腐中非血鐵素鐵的吸收率。",
+      withLeafyVeg: "搭配菠菜需注意草酸可能影響鈣質吸收，建議不要大量同食。",
+      caution: "大豆製品。若有大豆過敏家族史，先諮詢醫生。選擇板豆腐（非嫩豆腐），鈣質含量更高。"
+    }
+  },
+  蝦仁: {
+    minAge: 9,
+    cookMethods: ["蒸熟","煮熟"],
+    firstIntro: false,
+    firstIntroNote: "建議9個月後、確認對多種食材無過敏後才引入，且需家長在場",
+    digestNote: "消化中等",
+    allergenRisk: "極高（甲殼類過敏原）",
+    weeklyMax: 2,
+    commentary: {
+      solo: "蝦仁提供豐富的鋅（免疫系統）及DHA（腦部發育），是優質海鮮蛋白。但甲殼類為八大過敏原之一，引入需格外謹慎。",
+      caution: "⚠️ 高過敏風險。首次引入量要極少（1/4隻），觀察至少5天。若有甲殼類過敏家族史，絕對先諮詢過敏科醫生再引入。"
+    }
+  },
+  菠菜: {
+    minAge: 6,
+    cookMethods: ["焯水後壓碎","蒸熟","煮熟"],
+    firstIntro: true,
+    firstIntroNote: "適合作為初次引入深綠色蔬菜",
+    digestNote: "消化中等，草酸較高",
+    allergenRisk: "低",
+    weeklyMax: 4,
+    commentary: {
+      solo: "菠菜鐵質（2.7mg/100g）及葉酸（194mcg/100g）含量均屬植物類食材頂尖。但草酸含量較高，會影響鈣、鐵吸收。烹煮前先焯水可去除50-60%草酸。",
+      withHemeMeat: "搭配動物性食材（牛肉、豬肝）時，動物性鐵吸收率高，可彌補菠菜本身草酸的影響。",
+      withVitC: "自身含28mg維C/100g，本身具有一定促鐵吸收效果。",
+      caution: "烹煮前必須焯水30秒去草酸。不建議大量進食，每次25g（約4-5棵）為宜。"
+    }
+  },
+  莧菜: {
+    minAge: 6,
+    cookMethods: ["蒸熟","煮熟","壓碎"],
+    firstIntro: true,
+    firstIntroNote: "適合作為初次引入深綠色蔬菜，草酸低於菠菜",
+    digestNote: "消化中等，優於菠菜",
+    allergenRisk: "低",
+    weeklyMax: 4,
+    commentary: {
+      solo: "莧菜在深綠色蔬菜中屬於綜合表現最佳的選擇。鐵質（2.5mg）及鈣質（180mg）均屬植物類食材中的高水平，草酸含量低於菠菜，維C（43mg）豐富，可自我促進鐵質吸收。",
+      withFish: "搭配鮭魚：DHA促進腦部，莧菜補鐵補鈣，是非常完整的組合。",
+      withHemeMeat: "搭配雞腿肉或牛肉末，可提供動物性及植物性鐵雙重來源，同時高維C促進吸收。",
+      caution: "相比菠菜，莧菜草酸較低，是更推薦的深綠色蔬菜選擇。"
+    }
+  },
+  南瓜: {
+    minAge: 4,
+    cookMethods: ["蒸熟","煮熟","烤熟"],
+    firstIntro: true,
+    firstIntroNote: "非常適合作為初次引入蔬菜，甜味高，接受度佳",
+    digestNote: "消化最易，是嬰兒最易接受的蔬菜之一",
+    allergenRisk: "極低",
+    weeklyMax: 5,
+    commentary: {
+      solo: "南瓜是嬰兒副食品中接受度最高的蔬菜之一，天然甜味令嬰兒容易接受。β-胡蘿蔔素（維A前體）含量豐富（426mcg RE/100g），對視力及免疫系統發育重要。",
+      withFat: "β-胡蘿蔔素為脂溶性，搭配含健康脂肪的食材（牛油果、魚類）可大幅提升吸收率。",
+      withEgg: "南瓜+雞蛋是最受嬰兒歡迎的組合之一，顏色鮮豔，口味溫和。",
+      caution: "大量進食可能導致皮膚輕微泛黃（β-胡蘿蔔素沉積），無害但建議適量。"
+    }
+  },
+  紅蘿蔔: {
+    minAge: 4,
+    cookMethods: ["蒸熟","煮熟","烤熟"],
+    firstIntro: true,
+    firstIntroNote: "適合作為初次引入根莖類蔬菜",
+    digestNote: "消化極易，熟透後質地細膩",
+    allergenRisk: "極低",
+    weeklyMax: 5,
+    commentary: {
+      solo: "紅蘿蔔β-胡蘿蔔素含量極豐富（835mcg RE/100g），是所有常見蔬菜中最高之一。蒸熟後甜味增加，適合嬰兒口感。",
+      withFat: "必須搭配脂肪才能充分吸收β-胡蘿蔔素，可在烹調時加入少量橄欖油。",
+      withMeat: "搭配肉類提供均衡蛋白質，紅蘿蔔的膳食纖維有助消化。",
+      caution: "過量進食可能導致皮膚輕微泛黃（無害）。"
+    }
+  },
+  番茄: {
+    minAge: 6,
+    cookMethods: ["蒸熟","煮熟","去皮壓碎"],
+    firstIntro: true,
+    firstIntroNote: "適合作為維C來源食材引入",
+    digestNote: "消化極易",
+    allergenRisk: "低",
+    weeklyMax: 5,
+    commentary: {
+      solo: "番茄維C含量（23mg/100g）豐富，最主要的功能是作為補鐵餐的最佳配搭食材，可將同餐非血鐵素鐵的吸收率提升2-3倍。茄紅素為抗氧化劑，加熱後含量反而增加。",
+      withIronFood: "補鐵首選配搭：番茄+牛肉末/豬肝/雞腿肉，是科學驗證最能提升鐵質吸收的組合之一。",
+      withEgg: "番茄炒蛋（不加油鹽）是最經典的嬰兒食材組合，維C促鐵，雞蛋提供完整蛋白質。",
+      caution: "選擇熟透番茄，去皮去籽後壓碎。避免未成熟的青番茄。"
+    }
+  },
+  菇類: {
+    minAge: 8,
+    cookMethods: ["蒸熟","煮熟","切碎"],
+    firstIntro: false,
+    firstIntroNote: "建議8個月後引入，質地需煮軟後切碎",
+    digestNote: "消化中等，纖維較多",
+    allergenRisk: "低",
+    weeklyMax: 3,
+    commentary: {
+      solo: "菇類最大的特點是維他命D含量（5-20mcg/100g，日曬香菇更高），是植物性食材中少有的維D來源。多糖體成份有助增強嬰兒免疫系統。",
+      withEgg: "菇類+雞蛋是補充維D的絕佳組合：菇類提供植物性維D，雞蛋提供維D2及卵磷脂。",
+      withMeat: "搭配雞腿肉，提供蛋白質的同時補充維D，有助鈣質吸收。",
+      caution: "選擇常見菇類（香菇、秀珍菇），確保煮軟後切碎。日曬香菇維D含量更高，建議優先選用。"
+    }
+  },
+  西蘭花: {
+    minAge: 6,
+    cookMethods: ["蒸熟","煮熟","壓碎"],
+    firstIntro: true,
+    firstIntroNote: "適合作為高維C蔬菜引入",
+    digestNote: "消化中等，可能引起輕微脹氣",
+    allergenRisk: "低",
+    weeklyMax: 4,
+    commentary: {
+      solo: "西蘭花維C含量極高（89mg/100g），是補鐵餐的最強植物性促吸收食材之一。同時含鈣質（47mg）及葉酸（63mcg），是營養密度最高的蔬菜之一。",
+      withIronFood: "西蘭花+牛肉末/雞腿肉：高維C+動物性鐵，科學配搭，鐵質吸收效率最大化。",
+      withEgg: "西蘭花+雞蛋：完整蛋白質+高維C+鈣質，均衡度極高。",
+      caution: "部分嬰兒初次進食可能有輕微脹氣，份量由少增多。蒸熟後壓碎，不需要焯水。"
+    }
+  },
+  地瓜葉: {
+    minAge: 6,
+    cookMethods: ["蒸熟","焯水壓碎"],
+    firstIntro: true,
+    firstIntroNote: "適合作為深綠色蔬菜引入，草酸低",
+    digestNote: "消化中等",
+    allergenRisk: "極低",
+    weeklyMax: 4,
+    commentary: {
+      solo: "地瓜葉（番薯葉）是容易被忽視但營養極豐富的蔬菜。鐵質（2.5mg）、維C（55mg）及β-胡蘿蔔素均屬高水平，三者同時存在使其成為極佳的補鐵食材。",
+      withMeat: "搭配動物性蛋白，植物性鐵+維C的組合可大幅提升整餐鐵質吸收效率。",
+      caution: "烹調前去除較老的莖部，選用嫩葉。"
+    }
+  },
+  軟飯: {
+    minAge: 6,
+    cookMethods: ["煮軟（米:水=1:5至1:8）"],
+    firstIntro: true,
+    firstIntroNote: "嬰兒最基礎的主食，適合6個月後引入",
+    digestNote: "消化最易，是最安全的主食選擇",
+    allergenRisk: "極低",
+    weeklyMax: 14,
+    commentary: {
+      solo: "軟飯是嬰兒副食品的基礎主食，提供碳水化合物能量，質地最易消化。GI值較高，消化速度快，適合活潑好動的嬰兒。",
+      caution: "煮至米粒軟爛，可用手指輕易壓碎為準。不加鹽。"
+    }
+  },
+  地瓜: {
+    minAge: 4,
+    cookMethods: ["蒸熟","烤熟","壓泥"],
+    firstIntro: true,
+    firstIntroNote: "最受嬰兒歡迎的主食類食材，甜味天然",
+    digestNote: "消化極易，天然甜味助接受",
+    allergenRisk: "極低",
+    weeklyMax: 5,
+    commentary: {
+      solo: "地瓜是嬰兒主食的最佳選擇之一。β-胡蘿蔔素（709mcg RE/100g）含量豐富，維C（20mg）適量，膳食纖維（3g）有助腸道健康。天然甜味令嬰兒容易接受。",
+      withFish: "地瓜+鮭魚：碳水+DHA+β-胡蘿蔔素，腦部及視力發育的黃金組合。",
+      withIronVeg: "地瓜+莧菜：主食+補鐵蔬菜，維C促進鐵吸收，纖維豐富。",
+      caution: "蒸至軟爛，壓成泥狀或切成手指食物條狀均可。"
+    }
+  },
+  馬鈴薯: {
+    minAge: 6,
+    cookMethods: ["蒸熟","煮熟","壓泥"],
+    firstIntro: true,
+    firstIntroNote: "適合作為主食引入，口感中性易接受",
+    digestNote: "消化極易",
+    allergenRisk: "極低",
+    weeklyMax: 4,
+    commentary: {
+      solo: "馬鈴薯提供碳水化合物及鉀質，維C含量（20mg/100g）較常人預期高。質地蒸熟後極易壓泥，是製作副食品的好選擇。",
+      withMeat: "搭配牛肉末+番茄，是西式嬰兒餐的經典組合，三者在口味上高度相容。",
+      caution: "避免已發芽或帶綠色的馬鈴薯（含龍葵鹼，有毒）。去皮蒸熟。"
+    }
+  },
+  燕麥粥: {
+    minAge: 6,
+    cookMethods: ["煮成粥狀","即溶燕麥加熱水"],
+    firstIntro: true,
+    firstIntroNote: "適合作為替代主食引入，纖維豐富",
+    digestNote: "消化良好，β-葡聚糖護腸",
+    allergenRisk: "低（含麩質，乳糜瀉患者注意）",
+    weeklyMax: 5,
+    commentary: {
+      solo: "燕麥粥的植物性鐵（2.0mg/100g）及鋅（1.9mg）在主食類中屬最高。β-葡聚糖有助腸道健康及穩定血糖。膳食纖維豐富，適合便秘嬰兒。",
+      withFruit: "燕麥粥+香蕉/蘋果：天然甜味讓嬰兒更易接受燕麥，同時補充鉀質及膳食纖維。",
+      withAvocado: "燕麥粥+牛油果：健康脂肪+複合碳水+葉酸，促進大腦發育。",
+      caution: "選擇嬰兒燕麥或純燕麥，避免含糖即食燕麥片。"
+    }
+  },
+  藜麥粥: {
+    minAge: 8,
+    cookMethods: ["煮成粥狀"],
+    firstIntro: false,
+    firstIntroNote: "建議8個月後引入，確認對多種穀物無過敏後",
+    digestNote: "消化中等，較燕麥稍重",
+    allergenRisk: "低",
+    weeklyMax: 3,
+    commentary: {
+      solo: "藜麥是少數含有「完整蛋白質」的植物性食材，含所有9種必需氨基酸，對素食或減少肉類的嬰兒特別重要。鐵（1.5mg）及葉酸（42mcg）含量亦屬可觀。",
+      withEgg: "藜麥+雞蛋：植物性+動物性完整蛋白質組合，氨基酸種類最齊全。",
+      caution: "煮前需充分沖洗去除皂苷（天然苦味物質）。"
+    }
+  },
+  香蕉: {
+    minAge: 4,
+    cookMethods: ["直接壓碎","切片"],
+    firstIntro: true,
+    firstIntroNote: "最適合初次引入的水果，幾乎零過敏風險",
+    digestNote: "消化最易",
+    allergenRisk: "極低",
+    weeklyMax: 7,
+    commentary: {
+      solo: "香蕉是最佳的嬰兒手指食物，天然甜味、軟糯質地、零需烹調。鉀質豐富，有助肌肉及神經功能。果膠成份有助腸道調節。",
+      withOatmeal: "香蕉+燕麥粥：鉀質+β-葡聚糖，腸道健康組合，天然甜味提升燕麥接受度。",
+      withAvocado: "香蕉+牛油果：甜味+健康脂肪，DHA吸收+脂溶性維素吸收。",
+      caution: "選擇熟透的香蕉（帶少許黑點），未熟香蕉含抗性澱粉，較難消化。"
+    }
+  },
+  蘋果: {
+    minAge: 4,
+    cookMethods: ["蒸軟","壓泥","去皮切片（8個月後手指食物）"],
+    firstIntro: true,
+    firstIntroNote: "適合作為初次引入水果",
+    digestNote: "消化極易，果膠助腸道",
+    allergenRisk: "極低",
+    weeklyMax: 7,
+    commentary: {
+      solo: "蘋果果膠有助調節腸道功能（便秘及腹瀉均有幫助）。槲皮素為天然抗氧化劑。作為補鐵餐的配搭水果，維C雖不高（5mg），但仍有輔助效果。",
+      withIronFood: "補鐵餐配蘋果：維C促鐵吸收，口感清甜，是嬰兒接受度最高的組合之一。",
+      caution: "6個月以下需蒸軟壓泥，8個月後可提供去皮軟蘋果片作手指食物。"
+    }
+  },
+  雪梨: {
+    minAge: 4,
+    cookMethods: ["蒸軟","壓泥"],
+    firstIntro: true,
+    firstIntroNote: "適合作為初次引入水果，潤腸效果好",
+    digestNote: "消化極易，天然膳食纖維",
+    allergenRisk: "極低",
+    weeklyMax: 5,
+    commentary: {
+      solo: "雪梨膳食纖維（3.1g/100g）豐富，是嬰兒便秘時的首選水果。水份充足，助補水。比蘋果口感更軟，更適合較小嬰兒。",
+      withLiver: "豬肝餐後配雪梨：豬肝鐵質豐富但氣味較重，雪梨清甜可作配搭或飯後補充，緩和口感。",
+      caution: "選熟透的雪梨，蒸軟後去核壓泥。"
+    }
+  },
+  牛油果: {
+    minAge: 6,
+    cookMethods: ["直接壓碎","切條（手指食物）"],
+    firstIntro: true,
+    firstIntroNote: "適合作為健康脂肪來源引入",
+    digestNote: "消化極易，脂肪為單不飽和脂肪",
+    allergenRisk: "低",
+    weeklyMax: 5,
+    commentary: {
+      solo: "牛油果是嬰兒食材中葉酸含量最高的水果（81mcg/100g），健康單不飽和脂肪有助脂溶性維素（A、D、E、K）的吸收，促進腦部發育。軟糯質地天然適合嬰兒。",
+      withFish: "牛油果+鮭魚：兩者均提供健康脂肪，DHA+葉酸+單不飽和脂肪，腦部發育最佳組合。",
+      withCarb: "搭配燕麥粥或軟飯，健康脂肪提供持久能量，有助脂溶性維素吸收。",
+      caution: "選熟透的牛油果（按壓略軟），未熟的質地硬且口感苦澀。去核後直接切條即可，不需烹調。"
+    }
+  },
+  奇異果: {
+    minAge: 8,
+    cookMethods: ["直接壓碎","去皮切小塊"],
+    firstIntro: false,
+    firstIntroNote: "建議8個月後引入，初次觀察3-5天",
+    digestNote: "消化良好，奇異酶助蛋白質消化",
+    allergenRisk: "中",
+    weeklyMax: 4,
+    commentary: {
+      solo: "奇異果是所有常見水果中維C含量最高的（93mg/100g），是補鐵餐最強的促吸收水果。奇異酶（天然蛋白酶）有助蛋白質消化。鈣質（34mg）在水果中亦屬較高。",
+      withIronFood: "補鐵餐+奇異果：這是最科學的配搭之一，93mg維C可將同餐非血鐵素鐵的吸收率提升至接近動物性鐵水平。",
+      caution: "部分嬰兒對奇異果有輕微過敏反應（口腔輕微刺痛感），初次引入需觀察。去皮，8個月後可壓碎，10個月後可切小塊。"
+    }
+  },
+  木瓜: {
+    minAge: 6,
+    cookMethods: ["直接壓碎","去皮去籽切小塊"],
+    firstIntro: true,
+    firstIntroNote: "適合作為熱帶水果的初次引入",
+    digestNote: "消化極易，木瓜酶助蛋白質消化",
+    allergenRisk: "低",
+    weeklyMax: 4,
+    commentary: {
+      solo: "木瓜含木瓜酵素（木瓜蛋白酶），天然助消化，特別適合在高蛋白餐後食用。維C（60mg/100g）豐富，可促進鐵質吸收。",
+      withProtein: "蛋白質餐後配木瓜：木瓜酵素幫助分解蛋白質，有助消化，是傳統飲食智慧的科學依據。",
+      caution: "選橙黃色熟透的木瓜，去皮去籽後壓碎。避免未熟的青木瓜（含有毒物質）。"
+    }
+  },
+  芝麻糊: {
+    minAge: 8,
+    cookMethods: ["加入粥內","加入軟飯"],
+    firstIntro: false,
+    firstIntroNote: "建議少量使用，不作主要食材",
+    digestNote: "消化中等",
+    allergenRisk: "中（芝麻過敏）",
+    weeklyMax: 3,
+    commentary: {
+      solo: "芝麻糊是植物性食材中鈣質（975mg/100g）及鐵質（5.0mg/100g）含量最高的食材，但每次用量需嚴格控制（約1茶匙/15g），作為增鈣增鐵的調味添加劑。",
+      withCarb: "加入軟飯或燕麥粥中：少量芝麻糊大幅提升主食的鈣鐵含量，又不影響主要口感。",
+      caution: "⚠️ 份量嚴格控制在1茶匙（15g）以內，不可多吃。芝麻為過敏原，首次引入需觀察。選擇純芝麻糊，不含糖鹽。"
+    }
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════════
+// ██ COMBO COMMENTARY DATABASE ██
+// 預設組合評論庫（食材組合 → 評論）
+// ══════════════════════════════════════════════════════════════════════
+const COMBO_RULES = [
+  {
+    // 補鐵黃金組合：動物性鐵 + 高維C
+    match: (foods) => {
+      const hasHeme = foods.some(n => FOODS[n]?.absorb === "heme" && (FOODS[n]?.iron||0) > 1);
+      const hasHighVitC = foods.some(n => (FOODS[n]?.vitC||0) >= 20);
+      return hasHeme && hasHighVitC;
+    },
+    tag: "🏆 補鐵黃金組合",
+    color: "#c0392b",
+    commentary: (foods) => {
+      const ironFood = foods.find(n => FOODS[n]?.absorb === "heme" && (FOODS[n]?.iron||0) > 1);
+      const vitCFood = foods.find(n => (FOODS[n]?.vitC||0) >= 20);
+      return `${ironFood}提供動物性鐵（吸收率25%），${vitCFood}的維C將整餐非血鐵素鐵吸收率提升3倍。此組合的鐵質利用效率是所有配搭中最高的。`;
+    }
+  },
+  {
+    // DHA腦部組合
+    match: (foods) => {
+      const totalDHA = foods.reduce((s,n) => s + (FOODS[n]?.dha||0)*FOODS[n]?.p/100, 0);
+      return totalDHA >= 150;
+    },
+    tag: "🧠 腦部發育組合",
+    color: "#1a6ca8",
+    commentary: (foods) => {
+      const dhaFood = foods.find(n => (FOODS[n]?.dha||0) > 100);
+      const totalDHA = foods.reduce((s,n) => s + (FOODS[n]?.dha||0)*(FOODS[n]?.p||0)/100, 0).toFixed(0);
+      return `此餐DHA含量約${totalDHA}mg（每日建議100mg），${dhaFood||""}提供主要DHA來源，對6-12個月腦部快速發育期尤為重要。`;
+    }
+  },
+  {
+    // 補鈣組合
+    match: (foods) => {
+      const totalCa = foods.reduce((s,n) => s + (FOODS[n]?.calcium||0)*(FOODS[n]?.p||0)/100, 0);
+      return totalCa >= 100;
+    },
+    tag: "🦴 高鈣補骨組合",
+    color: "#6d4c41",
+    commentary: (foods) => {
+      const totalCa = foods.reduce((s,n) => s + (FOODS[n]?.calcium||0)*(FOODS[n]?.p||0)/100, 0).toFixed(0);
+      return `此餐鈣質合計約${totalCa}mg（每日建議260mg），對骨骼及牙齒發育有良好支持。`;
+    }
+  },
+  {
+    // 高草酸衝突警告
+    match: (foods) => {
+      const hasHighOxalate = foods.some(n => ["菠菜"].includes(n));
+      const hasHighCa = foods.some(n => (FOODS[n]?.calcium||0) > 100);
+      return hasHighOxalate && hasHighCa;
+    },
+    tag: "⚠️ 注意草酸影響",
+    color: "#e07030",
+    commentary: () => "菠菜含草酸較高，可能影響同餐鈣質及部分礦物質的吸收。建議菠菜烹煮前先焯水30秒去草酸，或將菠菜與高鈣食材分開不同餐進食。"
+  },
+  {
+    // 均衡四類組合
+    match: (foods) => {
+      const cats = new Set(foods.map(n => FOODS[n]?.cat).filter(Boolean));
+      return cats.has("protein") && cats.has("veg") && cats.has("carb");
+    },
+    tag: "⚖️ 結構均衡",
+    color: "#6a1b9a",
+    commentary: () => "此餐包含蛋白質、蔬菜及主食三大類別，結構均衡，適合作為每日正餐的基礎組合。"
+  },
+  {
+    // 首次引入建議組合
+    match: (foods) => {
+      return foods.length >= 2 && foods.every(n => FOODS_EXT[n]?.firstIntro === true);
+    },
+    tag: "🌱 初次引入友善",
+    color: "#2e7d32",
+    commentary: () => "此組合中的食材均為低過敏風險，適合副食品初期使用。建議每次只引入一種新食材，觀察3-5天確認無過敏反應後再加入下一種。"
+  },
+];
+
+// ══════════════════════════════════════════════════════════════════════
+// ██ NUTRITION ANALYSIS ENGINE ██
+// ══════════════════════════════════════════════════════════════════════
+function getFullNutritionAnalysis(selectedFoods) {
+  if (!selectedFoods.length) return null;
+
+  // Base nutrition calculation
+  const nut = {};
+  Object.keys(DAILY_TARGETS).forEach(k => nut[k] = 0);
+  selectedFoods.forEach(name => {
+    const f = FOODS[name]; if (!f) return;
+    Object.keys(DAILY_TARGETS).forEach(k => {
+      nut[k] = (nut[k]||0) + (f[k]||0) * f.p / 100;
+    });
+  });
+
+  // Effective iron (considering vitC boost)
+  const effectiveIron = calcEffectiveIron(selectedFoods);
+
+  // % of daily target this meal covers
+  const pctOfDaily = {};
+  Object.keys(DAILY_TARGETS).forEach(k => {
+    pctOfDaily[k] = Math.round(nut[k] / DAILY_TARGETS[k] * 100);
+  });
+
+  // Digest score
+  const digestScore = selectedFoods.reduce((s,n) => s + (FOODS[n]?.digest||1), 0);
+
+  // Allergen check
+  const allergens = [...new Set(selectedFoods.flatMap(n => FOODS[n]?.allergen||[]))];
+
+  // Age appropriateness (current baby is 10 months)
+  const AGE_MONTHS = 10;
+  const ageIssues = selectedFoods.filter(n => (FOODS_EXT[n]?.minAge||0) > AGE_MONTHS);
+
+  // New food check
+  const weeklyCount = getWeekCount();
+  const newFoods = selectedFoods.filter(n => !(weeklyCount[n]));
+
+  // Category distribution
+  const catDist = {};
+  selectedFoods.forEach(n => {
+    const cat = FOODS[n]?.cat||"other";
+    catDist[cat] = (catDist[cat]||0) + 1;
+  });
+
+  // Matching combo rules
+  const matchedRules = COMBO_RULES.filter(r => r.match(selectedFoods));
+
+  // Identify dominant nutrient
+  const nutEntries = Object.entries(pctOfDaily)
+    .filter(([k]) => ["iron","calcium","protein","dha","vitD","vitC","fiber"].includes(k))
+    .sort((a,b) => b[1]-a[1]);
+
+  return {
+    nut, effectiveIron, pctOfDaily,
+    digestScore,
+    allergens,
+    ageIssues,
+    newFoods,
+    catDist,
+    matchedRules,
+    dominantNutrients: nutEntries.slice(0,3).map(([k]) => k),
+  };
+}
+
+
+const DAILY_TARGETS={iron:10,zinc:3,vitD:10,calcium:260,protein:11,dha:100,fiber:5,vitC:50,vitA:500,vitB12:0.5,folate:80};
+// ── 一鍵配對主題 ────────────────────────────────────────────────────
+const MEAL_THEMES={
+  補鐵:{
+    emoji:"🩸", label:"加強補鐵",
+    color:"#c0392b", bg:"#fdecea",
+    desc:"優先選擇高鐵食材，並配搭維C以提升吸收率",
+    // Score weights: iron absorption is king
+    weights:{iron:5, vitC_boost:4, heme:3, calcium:-0.5, fiber:0.5},
+    // Preferred combos
+    mustHave:["protein"], // must include a protein
+    vitCBoost:true,       // must try to include vitC food
+  },
+  補DHA:{
+    emoji:"🐟", label:"補充DHA",
+    color:"#1a6ca8", bg:"#e3f2fd",
+    desc:"選擇富含DHA的魚類，促進腦部及視力發育",
+    weights:{dha:5, protein:2, vitD:2, iron:1},
+    mustHave:["protein"],
+    vitCBoost:false,
+  },
+  補鈣:{
+    emoji:"🦴", label:"補充鈣質",
+    color:"#6d4c41", bg:"#efebe9",
+    desc:"選擇高鈣食材，配合維D促進鈣質吸收",
+    weights:{calcium:5, vitD:3, protein:2, fiber:1},
+    mustHave:["protein"],
+    vitCBoost:false,
+  },
+  補纖維:{
+    emoji:"🌿", label:"補膳食纖維",
+    color:"#2e7d32", bg:"#e8f5e9",
+    desc:"促進腸道健康，適合便秘或消化不暢時",
+    weights:{fiber:5, vitC:2, calcium:1, protein:2},
+    mustHave:["carb"],
+    vitCBoost:false,
+  },
+  補維D:{
+    emoji:"☀️", label:"補維他命D",
+    color:"#f57f17", bg:"#fff8e1",
+    desc:"促進鈣吸收及骨骼發育，菇類及魚類為主",
+    weights:{vitD:5, calcium:3, dha:2, protein:2},
+    mustHave:["protein"],
+    vitCBoost:false,
+  },
+  均衡:{
+    emoji:"⚖️", label:"均衡配搭",
+    color:"#6a1b9a", bg:"#f3e5f5",
+    desc:"根據本週整體缺口，自動生成最均衡的一餐",
+    weights:{iron:2, calcium:2, protein:2, fiber:2, vitD:1, dha:1},
+    mustHave:["protein","veg","carb"],
+    vitCBoost:true,
+  },
+};
+
+const MILK_PER_100ML={iron:0.31,zinc:0.43,vitD:1.1,calcium:36,protein:1.3,dha:18,fiber:0,vitC:11,vitA:42,vitB12:0.18,folate:10};
+const DAILY_MILK=720;
+const LIVER_MAX=2;
+const FOOD_WEEK_MAX=3;
+const MAX_DIGEST=8;
+const MEAL_SLOTS={protein:{required:true,max:1},veg:{required:true,max:2},carb:{required:true,max:1},fruit:{required:false,max:1},fat:{required:false,max:1}};
+const STORE_KEY="yuyu-v2";
+
+const MENU=[
+  {day:"一",meals:[{name:"牛肉菠菜軟飯",foods:["牛肉末","菠菜","軟飯","蘋果"],purpose:"重點補鐵",tip:"補鐵餐：餐前後1小時勿餵奶"},{name:"鮭魚南瓜粥",foods:["鮭魚","南瓜","軟飯","香蕉"],purpose:"補DHA",tip:"鮭魚去骨壓碎"}]},
+  {day:"二",meals:[{name:"雞腿肉莧菜地瓜",foods:["雞腿肉","莧菜","地瓜","雪梨"],purpose:"鐵+鈣雙補",tip:""},{name:"蒸蛋豆腐菇菇粥",foods:["雞蛋","板豆腐","菇類","牛油果"],purpose:"補鈣+維D",tip:""}]},
+  {day:"三",meals:[{name:"牛肉番茄馬鈴薯",foods:["牛肉末","番茄","馬鈴薯","奇異果"],purpose:"補鐵+高維C",tip:"補鐵餐：餐前後1小時勿餵奶"},{name:"白魚紅蘿蔔軟飯",foods:["白魚肉","紅蘿蔔","軟飯","香蕉"],purpose:"低過敏蛋白",tip:""}]},
+  {day:"四",meals:[{name:"豬肝菠菜粥",foods:["豬肝","菠菜","軟飯","雪梨"],purpose:"高鐵日",tip:"豬肝每週不超過2次"},{name:"雞蛋南瓜地瓜",foods:["雞蛋","南瓜","地瓜","牛油果"],purpose:"蛋白+健康脂肪",tip:""}]},
+  {day:"五",meals:[{name:"鮭魚莧菜地瓜",foods:["鮭魚","莧菜","地瓜","木瓜"],purpose:"DHA+鈣",tip:""},{name:"雞腿肉菇菇燕麥",foods:["雞腿肉","菇類","燕麥粥","香蕉"],purpose:"蛋白+維D+纖維",tip:""}]},
+  {day:"六",meals:[{name:"牛肉西蘭花馬鈴薯",foods:["牛肉末","西蘭花","馬鈴薯","雪梨"],purpose:"補鐵+高維C",tip:"補鐵餐：餐前後1小時勿餵奶"},{name:"豆腐番茄菠菜粥",foods:["板豆腐","番茄","菠菜","牛油果"],purpose:"補鈣+植物鐵",tip:""}]},
+  {day:"日",meals:[{name:"豬肉末南瓜藜麥",foods:["豬肉末","南瓜","藜麥粥","香蕉"],purpose:"均衡+完整蛋白",tip:""},{name:"雞蛋鮭魚莧菜粥",foods:["雞蛋","鮭魚","莧菜","奇異果"],purpose:"DHA+鐵+高維C",tip:""}]},
+];
+
+const NUT_DISPLAY=[{k:"iron",l:"鐵質",u:"mg"},{k:"zinc",l:"鋅",u:"mg"},{k:"vitD",l:"維D",u:"mcg"},{k:"calcium",l:"鈣質",u:"mg"},{k:"protein",l:"蛋白質",u:"g"},{k:"dha",l:"DHA",u:"mg"},{k:"fiber",l:"纖維",u:"g"},{k:"vitC",l:"維C",u:"mg"}];
+const NUT_LABEL={iron:"鐵質",zinc:"鋅",vitD:"維他命D",calcium:"鈣質",protein:"蛋白質",dha:"DHA",fiber:"膳食纖維",vitC:"維他命C",vitA:"維他命A",vitB12:"維B12",folate:"葉酸"};
+
+function loadState(){try{const r=localStorage.getItem(STORE_KEY);if(r)return JSON.parse(r);}catch(e){}return{log:{},notes:{},customMeals:{}};}
+function saveState(){
+  try{localStorage.setItem(STORE_KEY,JSON.stringify({log:S.log,notes:S.notes,customMeals:S.customMeals}));
+  const d=document.getElementById("save-dot");if(d){d.classList.add("saved");setTimeout(()=>d.classList.remove("saved"),1500);}}catch(e){}
+}
+const _p=loadState();
+let S={tab:"weekly",day:0,log:_p.log||{},notes:_p.notes||{},dynSel:[],dynFilter:"all",
+  customMeals:_p.customMeals||{},
+  editingSlot:null,
+  themeResult:null,  // current theme recommendation
+  guideFilter:"all", guideSearch:""  // guide page state
+};
+
+function getMilkBase(){const t={};Object.keys(DAILY_TARGETS).forEach(k=>{t[k]=(MILK_PER_100ML[k]||0)*DAILY_MILK/100*7;});return t;}
+function getFoodTotal(){
+  const t={};Object.keys(DAILY_TARGETS).forEach(k=>t[k]=0);
+  Object.values(S.log).forEach(foods=>foods.forEach(food=>{const f=FOODS[food];if(!f)return;Object.keys(DAILY_TARGETS).forEach(k=>{t[k]=(t[k]||0)+(f[k]||0)*f.p/100;});}));
+  return t;
+}
+function getDeficits(){
+  const m=getMilkBase(),fd=getFoodTotal(),res=[];
+  Object.keys(DAILY_TARGETS).forEach(k=>{const total=(m[k]||0)+(fd[k]||0),target=DAILY_TARGETS[k]*7,pct=Math.min(100,total/target*100);res.push({key:k,pct:Math.round(pct),deficit:target-total});});
+  return res.sort((a,b)=>a.pct-b.pct);
+}
+function calcEffectiveIron(sel){
+  let tot=0;
+  const hasVitC=sel.some(n=>{const f=FOODS[n];return f&&(f.vitC_boost||(f.vitC||0)>=15);});
+  sel.forEach(n=>{const f=FOODS[n];if(!f)return;const raw=(f.iron||0)*f.p/100;const rate=f.absorb==="heme"?0.25:(hasVitC?0.08*3:0.08);tot+=raw*rate;});
+  return tot;
+}
+
+// ── 今日已用餐次數 ──────────────────────────────────────────────────
+function getTodayMealCount(){
+  const d=S.day;
+  let count=0;
+  if(S.log[`${d}-0`]?.length>0) count++;
+  if(S.log[`${d}-1`]?.length>0) count++;
+  return count;
+}
+
+// ── 本週剩餘天數 ─────────────────────────────────────────────────────
+function getRemainingDays(){
+  return Math.max(0, 6 - S.day); // 剩餘天數（不含今天）
+}
+
+// ── 本週剩餘餐次預計可攝取的鐵質 ────────────────────────────────────
+function getWeekRemainingCapacity(){
+  const remainDays=getRemainingDays();
+  const todayMealsLeft=Math.max(0, 2-getTodayMealCount());
+  const totalMealsLeft=todayMealsLeft + remainDays*2;
+  return{remainDays, todayMealsLeft, totalMealsLeft};
+}
+
+// ── 動態推薦引擎（整週視角） ─────────────────────────────────────────
+function getRecommendations(sel, filterCat){
+  const deficits=getDeficits();
+  const top3=deficits.slice(0,3).map(d=>d.key);
+  const top5=deficits.slice(0,5).map(d=>d.key);
+  const wc=getWeekCount();
+  const selCats=sel.map(n=>FOODS[n]?.cat).filter(Boolean);
+  const catCount={};selCats.forEach(c=>catCount[c]=(catCount[c]||0)+1);
+  const usedDigest=sel.reduce((s,n)=>s+(FOODS[n]?.digest||1),0);
+  const {remainDays,todayMealsLeft,totalMealsLeft}=getWeekRemainingCapacity();
+
+  // 計算本週各營養素每餐平均需補充量
+  const m=getMilkBase(),fd=getFoodTotal();
+  const nutUrgency={};
+  Object.keys(DAILY_TARGETS).forEach(k=>{
+    const target=DAILY_TARGETS[k]*7;
+    const current=(m[k]||0)+(fd[k]||0);
+    const deficit=Math.max(0,target-current);
+    // 每餐平均需補充量
+    nutUrgency[k]=totalMealsLeft>0?deficit/totalMealsLeft:0;
+  });
+
+  const scores={};
+  Object.entries(FOODS).forEach(([name,f])=>{
+    if(sel.includes(name))return;
+    const catUsed=catCount[f.cat]||0,catMax=MEAL_SLOTS[f.cat]?.max||1;
+    if(catUsed>=catMax)return;
+    if(usedDigest+f.digest>MAX_DIGEST)return;
+    // If replacing a specific slot, only show foods of same category
+    if(filterCat&&f.cat!==filterCat)return;
+
+    let score=50;const reasons=[];
+
+    // ① 緊迫營養素補充（基於整週剩餘計算，最高權重）
+    top5.forEach((nut,i)=>{
+      const val=(f[nut]||0)*f.p/100;
+      const urgency=nutUrgency[nut]||0;
+      if(val>0&&urgency>0){
+        const urgencyBonus=Math.min(40,Math.round(val/urgency*20));
+        score+=Math.max(5,35-i*5)+urgencyBonus;
+        if(i<3) reasons.push(`補本週缺乏的${NUT_LABEL[nut]}`);
+      }
+    });
+
+    // ② 鐵質吸收協同邏輯（科學配搭核心）
+    const hasHemeIron=sel.some(n=>FOODS[n]?.absorb==="heme");
+    const hasNonHemeIron=sel.some(n=>FOODS[n]?.absorb==="non-heme"&&(FOODS[n]?.iron||0)>1);
+    // 有補鐵食材→推薦維C
+    if((hasHemeIron||hasNonHemeIron)&&f.vitC_boost){
+      score+=30;reasons.push("維C促進鐵質吸收（效果×3）");
+    }
+    // 有維C食材→推薦鐵質食材
+    const hasVitCFood=sel.some(n=>FOODS[n]?.vitC_boost||(FOODS[n]?.vitC||0)>=15);
+    if(hasVitCFood&&f.absorb==="heme"){
+      score+=25;reasons.push("配合維C，動物性鐵吸收率達25%");
+    }
+    if(hasVitCFood&&f.absorb==="non-heme"&&(f.iron||0)>1.5){
+      score+=20;reasons.push("配合維C，植物性鐵吸收率提升3倍");
+    }
+    // 尚未有任何補鐵食材→強力推薦
+    if(!hasHemeIron&&!hasNonHemeIron&&f.absorb==="heme"&&top3.includes("iron")){
+      score+=25;reasons.push("本週鐵質不足，優先補充動物性鐵");
+    }
+
+    // ③ 本週重複率懲罰（整週視角）
+    const weeklyUse=wc[name]||0;
+    if(weeklyUse===1) score-=10;
+    else if(weeklyUse===2) score-=25;
+    else if(weeklyUse>=3) score-=45;
+
+    // ④ 天然配搭加分
+    sel.forEach(sn=>{
+      if(FOODS[sn]?.pairs?.includes(name)){score+=12;reasons.push(`與${sn}天然配搭`);}
+    });
+
+    // ⑤ 消化友善加分
+    score+=(5-f.digest)*4;
+
+    // ⑥ 類別必要性（確保每餐結構完整）
+    if(MEAL_SLOTS[f.cat]?.required&&catUsed===0){
+      score+=25;reasons.push(`補充必要的${MEAL_SLOTS[f.cat]?.label||f.cat}`);
+    }
+
+    // ⑦ 本週完全未嘗試的食材加分
+    if(weeklyUse===0){score+=8;reasons.push("本週未曾進食，增加多樣性");}
+
+    // ⑧ 今日剩餘餐次調整（今日最後一餐→優先補本日缺口）
+    if(todayMealsLeft===1){
+      // 今日最後一餐，重點補充今日還沒攝取的類別
+      if(catUsed===0&&MEAL_SLOTS[f.cat]?.required) score+=15;
+    }
+
+    // ⑨ 週末補充策略（本週最後兩天→加大緊迫值）
+    if(remainDays<=1&&top3.includes("iron")&&f.absorb==="heme"){
+      score+=15;reasons.push("本週最後兩天，優先補充缺口");
+    }
+
+    // ⑩ 避免同餐衝突（草酸、鈣鐵競爭等）
+    let conflict=false;
+    sel.forEach(sn=>{if(FOODS[sn]?.avoid?.some(a=>a.includes(name)))conflict=true;});
+    if(conflict){score-=45;reasons.push("⚠️ 此組合有吸收衝突");}
+
+    // 過敏原提示（不扣分，只加入原因提示）
+    if(f.allergen?.length>0) reasons.push(`⚠️ 含${f.allergen.join("/")}過敏原`);
+
+    scores[name]={score,reasons:[...new Set(reasons)],food:f};
+  });
+
+  return Object.entries(scores)
+    .filter(([,v])=>v.score>0)
+    .sort((a,b)=>b[1].score-a[1].score)
+    .slice(0,12)
+    .map(([name,v])=>({name,...v}));
+}
+
+function getMealAnalysis(sel){
+  if(!sel.length)return null;
+  const mn={};Object.keys(DAILY_TARGETS).forEach(k=>mn[k]=0);
+  sel.forEach(name=>{const f=FOODS[name];if(!f)return;Object.keys(DAILY_TARGETS).forEach(k=>{mn[k]=(mn[k]||0)+(f[k]||0)*f.p/100;});});
+  const ei=calcEffectiveIron(sel);
+  const warnings=[];
+  if(sel.some(n=>FOODS[n]?.absorb==="heme"))warnings.push("⚠️ 補鐵餐：餐前後1小時勿餵奶");
+  if(sel.includes("豬肝"))warnings.push("⚠️ 豬肝每週不超過2次（20g/次）");
+  const ds=sel.reduce((s,n)=>s+(FOODS[n]?.digest||1),0);
+  return{mn,ei,warnings,ds};
+}
+
+// ── 一鍵主題配對引擎 ─────────────────────────────────────────────────
+function generateThemeMeal(themeKey){
+  const theme=MEAL_THEMES[themeKey];
+  if(!theme) return null;
+  const wc=getWeekCount();
+  const deficits=getDeficits();
+
+  // Score all foods by theme weights
+  function scoreFood(name){
+    const f=FOODS[name]; if(!f) return -99;
+    let score=0;
+    // Apply theme weights
+    Object.entries(theme.weights).forEach(([k,w])=>{
+      if(k==="heme") score+=(f.absorb==="heme"?1:0)*w*10;
+      else if(k==="vitC_boost") score+=(f.vitC_boost?1:0)*w*10;
+      else score+=(f[k]||0)*f.p/100*w;
+    });
+    // Week repetition penalty
+    score-=(wc[name]||0)*8;
+    // Week deficit bonus
+    deficits.slice(0,3).forEach((d,i)=>{
+      const val=(f[d.key]||0)*f.p/100;
+      if(val>0) score+=(3-i)*3;
+    });
+    // Digest score bonus (easier = better)
+    score+=(5-f.digest)*3;
+    return score;
+  }
+
+  const result={protein:null,veg:[],carb:null,fruit:null};
+
+  // Pick best protein
+  const proteins=Object.entries(FOODS)
+    .filter(([,f])=>f.cat==="protein")
+    .map(([name])=>({name,score:scoreFood(name)}))
+    .sort((a,b)=>b.score-a.score);
+  result.protein=proteins[0]?.name;
+
+  // Pick best veg(s) - up to 2, considering vitC boost if needed
+  const vegs=Object.entries(FOODS)
+    .filter(([,f])=>f.cat==="veg")
+    .map(([name])=>({name,score:scoreFood(name)+(theme.vitCBoost&&FOODS[name].vitC_boost?20:0)}))
+    .sort((a,b)=>b.score-a.score);
+  result.veg=[vegs[0]?.name, vegs[1]?.name].filter(Boolean).slice(0,1);
+
+  // Pick best carb
+  const carbs=Object.entries(FOODS)
+    .filter(([,f])=>f.cat==="carb")
+    .map(([name])=>({name,score:scoreFood(name)}))
+    .sort((a,b)=>b.score-a.score);
+  result.carb=carbs[0]?.name;
+
+  // Pick best fruit (consider vitC if theme needs it)
+  const fruits=Object.entries(FOODS)
+    .filter(([,f])=>f.cat==="fruit")
+    .map(([name])=>({name,score:scoreFood(name)+(theme.vitCBoost&&FOODS[name].vitC_boost?25:0)}))
+    .sort((a,b)=>b.score-a.score);
+  result.fruit=fruits[0]?.name;
+
+  const allFoods=[result.protein,...result.veg,result.carb,result.fruit].filter(Boolean);
+
+  // Calculate effective iron with this combination
+  const ei=calcEffectiveIron(allFoods);
+
+  // Calculate total nutrients
+  const nut={};
+  allFoods.forEach(name=>{
+    const f=FOODS[name]; if(!f) return;
+    ["iron","calcium","protein","dha","vitD","vitC","fiber"].forEach(k=>{
+      nut[k]=(nut[k]||0)+(f[k]||0)*f.p/100;
+    });
+  });
+
+  // Generate explanation
+  const reasons=[];
+  if(themeKey==="補鐵"&&result.protein){
+    const pf=FOODS[result.protein];
+    reasons.push(pf.absorb==="heme"?`${result.protein}提供動物性鐵，吸收率達25%`:`${result.protein}提供植物性鐵`);
+    const hasVitC=allFoods.some(n=>FOODS[n]?.vitC_boost);
+    if(hasVitC) reasons.push("配搭維C食材，鐵吸收效率提升3倍");
+  }
+  if(themeKey==="補DHA"&&result.protein) reasons.push(`${result.protein}每份提供DHA ${((FOODS[result.protein]?.dha||0)*FOODS[result.protein]?.p/100).toFixed(0)}mg`);
+  if(themeKey==="補鈣") reasons.push(`此餐鈣質合計約${nut.calcium?.toFixed(0)||0}mg`);
+
+  return{theme, themeKey, foods:allFoods, nut, ei, reasons};
+}
+
+function render(){const mc=document.getElementById("mc");if(!mc)return;mc.innerHTML={weekly:rWeekly,dynamic:rDynamic,tracker:rTracker,guide:rGuide,about:rAbout}[S.tab]();bind();}
+
+function rWeekly(){
+  const d=S.day;
+  const days=MENU.map((m,i)=>`<button class="db${i===d?" active":""}" data-day="${i}">${m.day}</button>`).join("");
+
+  // ── One-tap theme buttons ─────────────────────────────────────────
+  const themeButtons=Object.entries(MEAL_THEMES).map(([key,t])=>{
+    const active=S.themeResult?.themeKey===key;
+    return`<button class="theme-btn${active?" theme-btn-active":""}" data-theme="${key}"
+      style="${active?`background:${t.color};color:#fff;border-color:${t.color}`:`border-color:${t.color};color:${t.color}`}">
+      ${t.emoji} ${t.label}</button>`;
+  }).join("");
+
+  // ── Theme result card ─────────────────────────────────────────────
+  const tr=S.themeResult;
+  const themeCard=tr?`<div class="theme-result-card" style="border-color:${tr.theme.color};background:${tr.theme.bg}">
+    <div class="theme-result-header">
+      <span class="theme-result-icon">${tr.theme.emoji}</span>
+      <div style="flex:1">
+        <div class="theme-result-title">${tr.theme.label} — 配對結果</div>
+        <div class="theme-result-desc">${tr.theme.desc}</div>
+      </div>
+      <button class="theme-result-close" data-close-theme="1">×</button>
+    </div>
+    <div class="theme-result-foods">
+      ${tr.foods.map(name=>{
+        const f=FOODS[name]; if(!f) return"";
+        const nutVal=tr.themeKey==="補鐵"?(f.iron*f.p/100).toFixed(1)+"mg鐵":
+                     tr.themeKey==="補DHA"?(f.dha*f.p/100).toFixed(0)+"mg DHA":
+                     tr.themeKey==="補鈣"?(f.calcium*f.p/100).toFixed(0)+"mg鈣":
+                     tr.themeKey==="補維D"?(f.vitD*f.p/100).toFixed(1)+"mcg維D":"";
+        return`<div class="theme-food-chip">
+          <span style="font-size:20px">${f.emoji}</span>
+          <span class="theme-food-name">${name}</span>
+          <span class="theme-food-unit">${f.unit}</span>
+          ${nutVal?`<span class="theme-food-nut">${nutVal}</span>`:""}
+        </div>`;
+      }).join("")}
+    </div>
+    <div class="theme-result-nut">
+      🩸 有效鐵吸收 ${tr.ei.toFixed(1)}mg
+      ${tr.nut.dha>0?" · 🐟 DHA "+tr.nut.dha.toFixed(0)+"mg":""}
+      ${tr.nut.calcium>0?" · 🦴 鈣 "+tr.nut.calcium.toFixed(0)+"mg":""}
+      ${tr.nut.vitC>0?" · 🍋 維C "+tr.nut.vitC.toFixed(0)+"mg":""}
+      ${tr.nut.vitD>0?" · ☀️ 維D "+tr.nut.vitD.toFixed(1)+"mcg":""}
+    </div>
+    ${tr.reasons.length?`<div class="theme-result-reasons">${tr.reasons.map(r=>"💡 "+r).join(" · ")}</div>`:""}
+    <div class="theme-apply-note">套用後仍可點擊 ⇄ 自由更換個別食材</div>
+    <div class="action-btns" style="margin-top:8px">
+      <button class="btn-primary" data-apply-theme="0" style="background:${tr.theme.color}">套用到第一餐 →</button>
+      <button class="btn-sec" data-apply-theme="1">套用到第二餐</button>
+    </div>
+  </div>`:"";
+
+  // ── Meal cards ────────────────────────────────────────────────────
+  const meals=MENU[d].meals.map((meal,mi)=>{
+    const eaten=S.log[`${d}-${mi}`]||[];
+    const customFoods=S.customMeals?.[`${d}-${mi}`]||meal.foods;
+    const editingSlot=S.editingSlot;
+
+    const foods=customFoods.map((food,si)=>{
+      const f=FOODS[food]; if(!f) return"";
+      const role={protein:"蛋白質",veg:"蔬菜",carb:"主食",fruit:"水果/手指",fat:"健康脂肪"}[f.cat]||"";
+      const e=eaten.includes(food);
+      const slotKey=`${d}-${mi}-${si}`;
+      const isEditing=editingSlot===slotKey;
+
+      let swapPicker="";
+      if(isEditing){
+        const otherFoods=customFoods.filter((_,idx)=>idx!==si);
+        const recs=getRecommendations(otherFoods, f.cat);
+        const wc=getWeekCount();
+        swapPicker=`<div class="swap-picker" onclick="event.stopPropagation()">
+          <div class="swap-title">選擇替換食材（同類別）</div>
+          <div class="swap-grid">
+            ${recs.slice(0,9).map(r=>{
+              const rf=FOODS[r.name]; if(!rf) return"";
+              const used=wc[r.name]||0;
+              const liverOver=r.name==="豬肝"&&(wc["豬肝"]||0)>=LIVER_MAX;
+              const overUsed=used>=FOOD_WEEK_MAX&&r.name!=="豬肝";
+              const showWarn=liverOver||overUsed;
+              const warnText=liverOver?"⚠️ 不建議・本週已達2次，維A過量風險":overUsed?`⚠️ 不建議・本週已用${used}次，建議換其他食材`:"";
+              const topReason=r.reasons?.filter(x=>!x.startsWith("⚠️"))[0]||"";
+              return`<div class="swap-item" data-swap="${d}|${mi}|${si}|${r.name}">
+                <div class="swap-emoji">${rf.emoji}</div>
+                <div class="swap-name">${r.name}</div>
+                <div class="swap-nut">鐵${rf.iron}mg${rf.vitC>0?` C${rf.vitC}`:""}</div>
+                <div class="swap-unit">${rf.unit}</div>
+                ${topReason&&!showWarn?`<div class="swap-reason">${topReason}</div>`:""}
+                ${showWarn?`<div class="swap-warn">${warnText}</div>`:""}
+              </div>`;
+            }).join("")}
+          </div>
+          <button class="swap-cancel" data-cancel="1">取消</button>
+        </div>`;
+      }
+
+      return`<div class="fi${e?" eaten":""}" data-t="${d}|${mi}|${food}" style="position:relative">
+        <div class="food-top-row">
+          <div>
+            <div class="frole">${role}</div>
+            <div class="fname">${f.emoji} ${food}</div>
+            <div class="fdet">${f.p}g（${f.unit}）</div>
+            <div class="fdet" style="margin-top:1px">鐵 ${(f.iron*f.p/100).toFixed(1)}mg${f.vitC>0?` · 維C ${(f.vitC*f.p/100).toFixed(0)}mg`:""}</div>
+            <div class="ftex">${f.tex}</div>
+          </div>
+          <button class="swap-btn" data-edit="${slotKey}" title="更換食材">⇄</button>
+        </div>
+        ${f.n?`<div class="fnote">${f.n}</div>`:""}
+        <div class="fchk">${e?"✓ 已食用":"點擊標記"}</div>
+        ${swapPicker}
+      </div>`;
+    }).join("");
+
+    const mealNutHtml=getMealNutSummary(customFoods);
+    return`<div class="card">
+      <div class="mh">
+        <div><span class="mn-badge${mi===1?" two":""}">${mi===0?"第一餐":"第二餐"}</span><span class="mname">${meal.name}</span></div>
+        <span class="mp">${meal.purpose}</span>
+      </div>
+      <div class="fg">${foods}</div>
+      ${mealNutHtml}
+      ${meal.tip?`<div class="tip">💡 ${meal.tip}</div>`:""}
+    </div>`;
+  }).join("");
+
+  return`<div class="st">本週副食品餐單</div>
+    <div class="ss">點擊食材格標記已食用 · ⇄ 換食材 · 選主題一鍵配對後仍可自由調整</div>
+    <div class="day-tabs">${days}</div>
+    <div class="card">
+      <div class="nl" style="margin-bottom:9px">⚡ 一鍵配對主題</div>
+      <div class="theme-btn-row">${themeButtons}</div>
+    </div>
+    ${themeCard}
+    ${meals}
+    <div class="card na"><div class="nl">📝 今日觀察筆記</div>
+    <textarea id="ni" placeholder="記錄今日進食反應、大便情況、過敏觀察…">${S.notes[d]||""}</textarea></div>`;
+}
+
+function getMealNutSummary(foods){
+  if(!foods||!foods.length) return"";
+  const nut={iron:0,vitC:0,calcium:0,dha:0};
+  foods.forEach(name=>{const f=FOODS[name];if(!f)return;Object.keys(nut).forEach(k=>{nut[k]+=(f[k]||0)*f.p/100;});});
+  const ei=calcEffectiveIron(foods);
+  const parts=["🩸 鐵 "+nut.iron.toFixed(1)+"mg","有效吸收 "+ei.toFixed(1)+"mg"];
+  if(nut.vitC>0) parts.push("🍋 維C "+nut.vitC.toFixed(0)+"mg");
+  if(nut.calcium>0) parts.push("🦴 鈣 "+nut.calcium.toFixed(0)+"mg");
+  if(nut.dha>0) parts.push("🐟 DHA "+nut.dha.toFixed(0)+"mg");
+  return'<div class="meal-nut-bar">'+parts.map(p=>'<span>'+p+'</span>').join("")+'</div>';
+}
+
+function rDynamic(){
+  const sel = S.dynSel;
+  const analysis = sel.length > 0 ? getFullNutritionAnalysis(sel) : null;
+  const wc = getWeekCount();
+
+  // ── Food picker ────────────────────────────────────────────────
+  const filterBtns = ["all","protein","veg","carb","fruit","fat"].map(f => {
+    const lb = {all:"全部",protein:"蛋白質",veg:"蔬菜",carb:"主食",fruit:"水果",fat:"脂肪"};
+    return `<button class="db${S.dynFilter===f?" active":""}" data-filter="${f}" style="font-size:11px;padding:5px 10px">${lb[f]}</button>`;
+  }).join("");
+
+  const allFoods = Object.entries(FOODS)
+    .filter(([,f]) => S.dynFilter==="all" || f.cat===S.dynFilter)
+    .filter(([n]) => !sel.includes(n));
+
+  const recs = sel.length > 0 ? getRecommendations(sel) : [];
+  const recNames = new Set(recs.slice(0,6).map(r=>r.name));
+
+  const foodGrid = allFoods.map(([name,f]) => {
+    const isRec = recNames.has(name);
+    const used = wc[name]||0;
+    const ext = FOODS_EXT[name]||{};
+    const liverOver = name==="豬肝" && used >= LIVER_MAX;
+    const overUsed = used >= FOOD_WEEK_MAX && name!=="豬肝";
+    const showWarn = liverOver || overUsed;
+    const warnText = liverOver ? "⚠️ 不建議・本週已達2次" : overUsed ? `⚠️ 不建議・本週已用${used}次` : "";
+    const recData = recs.find(r=>r.name===name);
+    const topReason = recData?.reasons?.filter(x=>!x.startsWith("⚠️"))[0]||"";
+    return `<div class="fp-item${isRec&&!showWarn?" recommended":""}" data-pick="${name}">
+      <div class="fp-emoji">${f.emoji}</div>
+      <div class="fp-name">${name}</div>
+      <div class="fp-nut">鐵${f.iron}mg${f.vitC>0?` C${f.vitC}`:""}</div>
+      <div style="font-size:9px;color:var(--lt);margin-top:1px">${f.unit}</div>
+      ${isRec&&!showWarn?`<div class="fp-rec-badge">推薦↑</div>`:""}
+      ${isRec&&!showWarn&&topReason?`<div style="font-size:9px;color:#5a8a5a;margin-top:2px;line-height:1.3">${topReason}</div>`:""}
+      ${showWarn?`<div class="fp-warn">⚠️ 不建議</div><div style="font-size:9px;color:#e05050;margin-top:1px;line-height:1.3">${warnText}</div>`:""}
+      ${!showWarn&&used>0?`<div style="font-size:9px;color:#aaa">本週${used}次</div>`:""}
+      ${ext.allergenRisk==="高"||ext.allergenRisk==="極高"?`<div style="font-size:9px;color:#e07030;margin-top:2px">⚠️ 高過敏</div>`:""}
+    </div>`;
+  }).join("");
+
+  // ── Selected foods chips ───────────────────────────────────────
+  const selChips = sel.length > 0
+    ? sel.map(name=>`<div class="sel-chip" data-remove="${name}">${FOODS[name]?.emoji||""} ${name} <span class="rm">×</span></div>`).join("")
+    : `<span class="sel-empty">從下方選擇食材開始分析</span>`;
+
+  // ── Nutrition analysis panel ───────────────────────────────────
+  let analysisPanel = "";
+  if (analysis) {
+    const {nut, effectiveIron, pctOfDaily, digestScore, allergens, ageIssues, newFoods, catDist, matchedRules, dominantNutrients} = analysis;
+
+    // Nutrient bars
+    const nutBars = [
+      {k:"iron",   l:"鐵質",   u:"mg",  max:10},
+      {k:"calcium",l:"鈣質",   u:"mg",  max:260},
+      {k:"protein",l:"蛋白質", u:"g",   max:11},
+      {k:"dha",    l:"DHA",    u:"mg",  max:100},
+      {k:"vitD",   l:"維D",    u:"mcg", max:10},
+      {k:"vitC",   l:"維C",    u:"mg",  max:50},
+      {k:"fiber",  l:"纖維",   u:"g",   max:5},
+    ].map(n => {
+      const val = nut[n.k]||0;
+      const pct = Math.min(100, val/n.max*100);
+      const c = pct>=60?"#4caf50":pct>=30?"#ff9800":"#bbb";
+      return `<div class="lab-nut-row">
+        <div class="lab-nut-label">${n.l}</div>
+        <div class="lab-nut-bar-wrap"><div class="lab-nut-bar" style="width:${pct}%;background:${c}"></div></div>
+        <div class="lab-nut-val">${val.toFixed(1)}${n.u}</div>
+        <div class="lab-nut-pct" style="color:${c}">${Math.round(pct)}%</div>
+      </div>`;
+    }).join("");
+
+    // Effective iron row
+    const eiPct = Math.min(100, effectiveIron/10*100);
+    const eiColor = eiPct>=30?"#4caf50":eiPct>=15?"#ff9800":"#bbb";
+    const eiBar = `<div class="lab-nut-row" style="border-top:1px dashed var(--border);padding-top:8px;margin-top:4px">
+      <div class="lab-nut-label" style="font-size:10px">有效鐵<br>吸收</div>
+      <div class="lab-nut-bar-wrap"><div class="lab-nut-bar" style="width:${eiPct}%;background:${eiColor}"></div></div>
+      <div class="lab-nut-val">${effectiveIron.toFixed(2)}mg</div>
+      <div class="lab-nut-pct" style="color:${eiColor}">${Math.round(eiPct)}%</div>
+    </div>`;
+
+    // Category balance
+    const catLabels = {protein:"蛋白質",veg:"蔬菜",carb:"主食",fruit:"水果",fat:"脂肪"};
+    const catBalance = Object.entries(catLabels).map(([cat,label]) => {
+      const count = catDist[cat]||0;
+      const needed = cat==="protein"||cat==="veg"||cat==="carb";
+      const ok = count > 0;
+      return `<span class="cat-chip" style="background:${ok?"#e8f5e9":"#fdecea"};color:${ok?"#2e7d32":"#c0392b"}">${ok?"✓":"○"} ${label}</span>`;
+    }).join("");
+
+    // Matched combo tags
+    const comboTags = matchedRules.map(r =>
+      `<div class="combo-tag" style="border-color:${r.color};color:${r.color}">${r.tag}</div>`
+    ).join("");
+
+    // Combo commentaries
+    const commentaries = matchedRules.map(r =>
+      `<div class="combo-comment" style="border-left-color:${r.color}">
+        <div class="combo-comment-tag" style="color:${r.color}">${r.tag}</div>
+        <div class="combo-comment-text">${r.commentary(sel)}</div>
+      </div>`
+    ).join("");
+
+    // Individual food notes
+    const foodNotes = sel.map(name => {
+      const ext = FOODS_EXT[name];
+      if (!ext) return "";
+      const comment = ext.commentary?.solo || "";
+      return comment ? `<div class="food-note-item">
+        <span class="food-note-name">${FOODS[name]?.emoji||""} ${name}</span>
+        <span class="food-note-text">${comment}</span>
+      </div>` : "";
+    }).filter(Boolean).join("");
+
+    // Warnings
+    const warnings = [];
+    if (allergens.length) warnings.push(`⚠️ 過敏原：${allergens.join("、")}`);
+    if (ageIssues.length) warnings.push(`⚠️ ${ageIssues.join("、")} 建議引入月齡較大`);
+    if (newFoods.length) warnings.push(`🆕 新食材：${newFoods.join("、")}，引入後觀察3-5天`);
+    const digestLabel = digestScore<=3?"輕鬆":digestScore<=5?"適中":digestScore<=7?"偏重":"較重";
+    const digestColor = digestScore<=3?"#4caf50":digestScore<=5?"#ff9800":digestScore<=7?"#f57c00":"#e05050";
+
+    analysisPanel = `
+    <div class="card" style="margin-top:4px">
+      <div class="lab-section-title">📊 營養分析</div>
+      <div class="lab-meta-row">
+        <span class="lab-meta-chip">食材數: ${sel.length}種</span>
+        <span class="lab-meta-chip" style="color:${digestColor}">消化負擔: ${digestLabel}</span>
+        ${allergens.length?`<span class="lab-meta-chip" style="color:#e07030">過敏原: ${allergens.join("/")} </span>`:""}
+      </div>
+      <div class="cat-balance-row">${catBalance}</div>
+      ${nutBars}${eiBar}
+    </div>
+
+    ${matchedRules.length?`<div class="card">
+      <div class="lab-section-title">🏷️ 組合特徵</div>
+      <div class="combo-tags-row">${comboTags}</div>
+      ${commentaries}
+    </div>`:""}
+
+    <div class="card">
+      <div class="lab-section-title">📝 食材評論</div>
+      ${foodNotes || `<div style="font-size:12px;color:#bbb">選擇食材後顯示評論</div>`}
+      ${warnings.length?`<div class="lab-warnings">${warnings.map(w=>`<div class="lab-warn-item">${w}</div>`).join("")}</div>`:""}
+    </div>
+
+    <div class="card">
+      <div class="lab-section-title">💡 烹調建議</div>
+      ${sel.map(name=>{
+        const ext=FOODS_EXT[name];
+        if(!ext?.cookMethods?.length) return "";
+        return `<div class="cook-item"><span class="cook-name">${name}</span><span class="cook-method">${ext.cookMethods.join(" / ")}</span></div>`;
+      }).filter(Boolean).join("")||`<div style="font-size:12px;color:#bbb">選擇食材後顯示</div>`}
+    </div>
+
+    <div class="action-btns">
+      <button class="btn-primary" id="lab-apply-1">套用到今日第一餐</button>
+      <button class="btn-sec" id="lab-apply-2">套用到第二餐</button>
+    </div>`;
+  }
+
+  return `<div class="st">配搭實驗室</div>
+    <div class="ss">自由選擇食材 → 即時營養分析 → 查看配搭評論 → 套用到餐單</div>
+
+    <div class="card">
+      <div class="section-label">✅ 已選食材（最多5種）</div>
+      <div class="selected-meal">${selChips}</div>
+      ${sel.length?`<button class="btn-sec" id="clear-sel" style="width:100%;margin-top:6px">清空重選</button>`:""}
+    </div>
+
+    ${analysisPanel}
+
+    <div class="card">
+      <div class="section-label">🔍 選擇食材 ${sel.length>0?`<span class="badge sage">綠色=與已選最匹配</span>`:""}</div>
+      <div class="day-tabs" style="margin-bottom:10px">${filterBtns}</div>
+      <div class="food-picker-grid">${foodGrid}</div>
+    </div>`;
+}
+
+
+function rTracker(){
+  const m=getMilkBase(),fd=getFoodTotal();
+  const rows=NUT_DISPLAY.map(n=>{const total=(m[n.k]||0)+(fd[n.k]||0),pct=Math.min(100,Math.round(total/(DAILY_TARGETS[n.k]*7)*100)),c=pct>=80?"#4caf50":pct>=50?"#ff9800":"#f44336";return`<div class="nr"><div class="nname">${n.l}</div><div class="bw"><div class="bf" style="width:${pct}%;background:${c}"></div></div><div class="bpct" style="color:${c}">${pct}%</div><div class="bst">${pct>=80?"✅":pct>=50?"⚠️":"🔴"}</div></div>`;}).join("");
+  const suggest={iron:"牛肉末、豬肝（限2次/週）、莧菜+維C",vitD:"鮭魚、日曬香菇、雞蛋",calcium:"板豆腐、莧菜、芝麻糊（少量）",dha:"鮭魚（每週至少2次）",fiber:"地瓜、牛油果、燕麥粥",vitC:"奇異果、西蘭花、番茄"};
+  const def=getDeficits().filter(d=>d.pct<80);
+  const defBox=def.length===0?`<div class="ib ok"><div class="it">🎉 本週所有主要營養素均達標！</div></div>`:`<div class="ib warn"><div class="it">⚠️ 本週需加強補充</div>${def.filter(d=>NUT_DISPLAY.find(n=>n.k===d.key)).map(d=>`<div class="ii">🔸 <strong>${NUT_LABEL[d.key]}</strong>（${d.pct}%）：${suggest[d.key]||"相關食材"}</div>`).join("")}</div>`;
+  const eaten=[...new Set(Object.values(S.log).flat())];
+  return`<div class="st">本週營養追蹤</div><div class="tn">奶粉（720mL/日×7日）+ 已標記副食品合計<br>每日目標：鐵10mg · 鈣260mg · 維D 10mcg · DHA 100mg · 維C 50mg</div>${rows}${defBox}<div class="ib plain" style="margin-top:12px"><div class="it">📋 本週已食用食材</div><div class="ftags">${eaten.length===0?`<span style="font-size:12px;color:#bbb">尚未標記</span>`:eaten.map(f=>`<span class="ftag">${FOODS[f]?.emoji||""} ${f}</span>`).join("")}</div></div>`;
+}
+
+function rGuide(){
+  // Search / filter
+  const filter = S.guideFilter||"all";
+  const search = S.guideSearch||"";
+
+  const filterBtns = ["all","protein","veg","carb","fruit","fat"].map(f=>{
+    const lb={all:"全部",protein:"蛋白質",veg:"蔬菜",carb:"主食",fruit:"水果",fat:"脂肪"};
+    return `<button class="db${filter===f?" active":""}" data-gfilter="${f}" style="font-size:11px;padding:5px 10px">${lb[f]}</button>`;
+  }).join("");
+
+  const foods = Object.entries(FOODS)
+    .filter(([,f]) => filter==="all" || f.cat===filter)
+    .filter(([name]) => !search || name.includes(search));
+
+  const cards = foods.map(([name, f]) => {
+    const ext = FOODS_EXT[name]||{};
+    const riskColor = ext.allergenRisk==="極低"?"#4caf50":ext.allergenRisk==="低"?"#8bc34a":ext.allergenRisk==="中"?"#ff9800":ext.allergenRisk==="高"||ext.allergenRisk==="極高"?"#e05050":"#aaa";
+    const digestLabel = (f.digest||1)<=1?"★☆☆☆☆ 最易":(f.digest||1)<=2?"★★☆☆☆ 易":(f.digest||1)<=3?"★★★☆☆ 中等":"★★★★☆ 偏重";
+    const cookHtml = ext.cookMethods?.map(m=>`<span class="guide-cook-tag">${m}</span>`).join("")||"";
+    const pairsHtml = f.pairs?.filter(p=>p!=="所有食材").slice(0,4).map(p=>`<span class="guide-pair-tag">${p}</span>`).join("")||"";
+
+    return `<div class="guide-card-v2">
+      <div class="guide-card-header">
+        <span class="guide-card-emoji">${f.emoji}</span>
+        <div class="guide-card-title-area">
+          <div class="guide-card-name">${name}</div>
+          <div class="guide-card-sub">${f.unit} · ${f.tex}</div>
+        </div>
+        ${ext.firstIntro?`<span class="guide-first-badge">初次引入✓</span>`:""}
+      </div>
+
+      <div class="guide-nut-chips">
+        ${f.iron>0?`<span class="guide-nut-chip iron">🩸 鐵 ${f.iron}mg</span>`:""}
+        ${f.calcium>0?`<span class="guide-nut-chip ca">🦴 鈣 ${f.calcium}mg</span>`:""}
+        ${f.protein>0?`<span class="guide-nut-chip pro">💪 蛋白 ${f.protein}g</span>`:""}
+        ${f.dha>0?`<span class="guide-nut-chip dha">🐟 DHA ${f.dha}mg</span>`:""}
+        ${f.vitD>0?`<span class="guide-nut-chip vitd">☀️ 維D ${f.vitD}mcg</span>`:""}
+        ${f.vitC>0?`<span class="guide-nut-chip vitc">🍋 維C ${f.vitC}mg</span>`:""}
+        ${f.fiber>0?`<span class="guide-nut-chip fib">🌿 纖維 ${f.fiber}g</span>`:""}
+      </div>
+
+      <div class="guide-info-grid">
+        <div class="guide-info-item"><span class="guide-info-label">適合月齡</span><span class="guide-info-val">${ext.minAge||6}個月+</span></div>
+        <div class="guide-info-item"><span class="guide-info-label">過敏風險</span><span class="guide-info-val" style="color:${riskColor}">${ext.allergenRisk||"低"}</span></div>
+        <div class="guide-info-item"><span class="guide-info-label">每次份量</span><span class="guide-info-val">${f.p}g（${f.unit}）</span></div>
+        <div class="guide-info-item"><span class="guide-info-label">消化負擔</span><span class="guide-info-val">${digestLabel}</span></div>
+        <div class="guide-info-item"><span class="guide-info-label">週上限</span><span class="guide-info-val">${ext.weeklyMax||5}次</span></div>
+        <div class="guide-info-item"><span class="guide-info-label">初次引入</span><span class="guide-info-val">${ext.firstIntro?"✅ 適合":"需謹慎"}</span></div>
+      </div>
+
+      ${cookHtml?`<div class="guide-section-label">🔥 烹調方式</div><div class="guide-tags-row">${cookHtml}</div>`:""}
+      ${pairsHtml?`<div class="guide-section-label">🤝 常見配搭</div><div class="guide-tags-row">${pairsHtml}</div>`:""}
+
+      ${ext.commentary?.solo?`<div class="guide-section-label">📝 營養評論</div>
+        <div class="guide-commentary">${ext.commentary.solo}</div>`:""}
+
+      ${ext.firstIntroNote?`<div class="guide-intro-note">🌱 引入建議：${ext.firstIntroNote}</div>`:""}
+      ${f.n?`<div class="guide-caution">${f.n}</div>`:""}
+    </div>`;
+  }).join("");
+
+  return `<div class="st">食材知識庫</div>
+    <div class="ss">完整食材資料 · 月齡建議 · 過敏風險 · 烹調方式 · 營養評論</div>
+    <div class="card" style="padding:10px 14px">
+      <div class="day-tabs" style="margin-bottom:0">${filterBtns}</div>
+    </div>
+    <div class="guide-cards-list">${cards}</div>`;
+}
+
+
+function rAbout(){
+  return`<div class="st">使用說明</div>
+    <div class="about-card"><div class="about-title">🧩 動態配搭系統邏輯</div>
+    <div class="about-item">選擇第一種食材，系統分析本週缺乏營養素、已使用食材次數、消化負擔等多項因素</div>
+    <div class="about-item">每新增一種食材，系統即時重新運算更新推薦（綠色顯示為本週優先推薦）</div>
+    <div class="about-item">推薦考慮：鐵質吸收協同效應、維C促鐵、避免草酸衝突、天然味道配搭、週內食材多樣性</div>
+    <div class="about-item">確認此餐後點「記錄此餐已食」，數據自動更新到「營養追蹤」</div></div>
+    <div class="about-card"><div class="about-title">🔄 更新 GitHub 網頁步驟</div>
+    <div class="about-code">1. github.com/jokerjoestarakira/baby-nutrition<br>2. 點 index.html → 鉛筆圖示<br>3. 全選 → 貼上新內容 → Commit<br>4. 等1分鐘生效</div></div>
+    <div class="about-card"><div class="about-title">📥 匯出記錄</div><button class="update-btn" id="export-btn">匯出本週記錄 JSON</button></div>`;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// ██ EVENT DELEGATION - Single listener, never re-bound ██
+// ══════════════════════════════════════════════════════════════════════
+
+// Cache for expensive computations
+let _weekCountCache = null;
+let _weekCountDirty = true;
+
+function getWeekCount() {
+  if (!_weekCountDirty && _weekCountCache) return _weekCountCache;
+  const c = {};
+  Object.values(S.log).forEach(foods => foods.forEach(f => { c[f] = (c[f]||0) + 1; }));
+  _weekCountCache = c;
+  _weekCountDirty = false;
+  return c;
+}
+
+function invalidateCache() {
+  _weekCountDirty = true;
+}
+
+function bind() {
+  // bind() is now a no-op — all events handled by delegation below
+}
+
+// ── Delegated click handler on <main> ─────────────────────────────
+document.getElementById("mc").addEventListener("click", function(e) {
+  const el = e.target.closest("[data-action]") ||
+             e.target.closest("[data-day]") ||
+             e.target.closest("[data-t]") ||
+             e.target.closest("[data-edit]") ||
+             e.target.closest("[data-swap]") ||
+             e.target.closest("[data-cancel]") ||
+             e.target.closest("[data-remove]") ||
+             e.target.closest("[data-pick]") ||
+             e.target.closest("[data-filter]") ||
+             e.target.closest("[data-gfilter]") ||
+             e.target.closest("[data-theme]") ||
+             e.target.closest("[data-close-theme]") ||
+             e.target.closest("[data-apply-theme]") ||
+             e.target.closest("#clear-sel") ||
+             e.target.closest("#confirm-meal") ||
+             e.target.closest("#lab-apply-1") ||
+             e.target.closest("#lab-apply-2") ||
+             e.target.closest("#export-btn") ||
+             e.target.closest("button[data-tab]") ||
+             e.target.closest(".nb");
+  if (!el) return;
+
+  // ── Nav tabs ──────────────────────────────────────────────────────
+  if (el.classList.contains("nb") || el.dataset.tab) {
+    const tab = el.dataset.tab;
+    if (!tab) return;
+    S.tab = tab;
+    document.querySelectorAll(".nb").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
+    render();
+    return;
+  }
+
+  // ── Day selector ──────────────────────────────────────────────────
+  if (el.dataset.day !== undefined && el.classList.contains("db") && !el.dataset.filter && !el.dataset.gfilter) {
+    S.day = parseInt(el.dataset.day);
+    render();
+    return;
+  }
+
+  // ── Food toggle (mark eaten) ──────────────────────────────────────
+  if (el.dataset.t) {
+    // Don't fire if clicking swap-btn inside food item
+    if (e.target.closest("[data-edit]")) return;
+    const [d, m, food] = el.dataset.t.split("|");
+    const key = `${d}-${m}`;
+    const cur = S.log[key] || [];
+    S.log[key] = cur.includes(food) ? cur.filter(f => f !== food) : [...cur, food];
+    invalidateCache();
+    saveState();
+    // Optimistic UI: just toggle class without full re-render
+    el.classList.toggle("eaten", S.log[key].includes(food));
+    const chk = el.querySelector(".fchk");
+    if (chk) chk.textContent = S.log[key].includes(food) ? "✓ 已食用" : "點擊標記";
+    updateMealNutBar(d, m);
+    return;
+  }
+
+  // ── Swap btn: open/close picker ───────────────────────────────────
+  if (el.dataset.edit) {
+    e.stopPropagation();
+    S.editingSlot = S.editingSlot === el.dataset.edit ? null : el.dataset.edit;
+    render();
+    return;
+  }
+
+  // ── Swap item: apply ──────────────────────────────────────────────
+  if (el.dataset.swap) {
+    e.stopPropagation();
+    const [d, mi, si, newFood] = el.dataset.swap.split("|");
+    const mealKey = `${d}-${mi}`;
+    const origFoods = MENU[parseInt(d)].meals[parseInt(mi)].foods;
+    const current = S.customMeals[mealKey] ? [...S.customMeals[mealKey]] : [...origFoods];
+    current[parseInt(si)] = newFood;
+    S.customMeals[mealKey] = current;
+    if (S.log[mealKey]) S.log[mealKey] = S.log[mealKey].filter(f => f !== origFoods[parseInt(si)]);
+    S.editingSlot = null;
+    invalidateCache();
+    saveState();
+    render();
+    return;
+  }
+
+  // ── Cancel swap ───────────────────────────────────────────────────
+  if (el.dataset.cancel) {
+    e.stopPropagation();
+    S.editingSlot = null;
+    render();
+    return;
+  }
+
+  // ── Dynamic lab: remove food ──────────────────────────────────────
+  if (el.dataset.remove) {
+    S.dynSel = S.dynSel.filter(n => n !== el.dataset.remove);
+    render();
+    return;
+  }
+
+  // ── Dynamic lab / weekly swap: pick food ──────────────────────────
+  if (el.dataset.pick) {
+    const name = el.dataset.pick;
+    if (!S.dynSel.includes(name) && S.dynSel.length < 5) {
+      S.dynSel = [...S.dynSel, name];
+      render();
+    }
+    return;
+  }
+
+  // ── Category filter (dynamic lab) ────────────────────────────────
+  if (el.dataset.filter) {
+    S.dynFilter = el.dataset.filter;
+    render();
+    return;
+  }
+
+  // ── Guide filter ──────────────────────────────────────────────────
+  if (el.dataset.gfilter) {
+    S.guideFilter = el.dataset.gfilter;
+    render();
+    return;
+  }
+
+  // ── Theme buttons ─────────────────────────────────────────────────
+  if (el.dataset.theme) {
+    const key = el.dataset.theme;
+    S.themeResult = S.themeResult?.themeKey === key ? null : generateThemeMeal(key);
+    render();
+    return;
+  }
+
+  // ── Close theme ───────────────────────────────────────────────────
+  if (el.dataset.closeTheme !== undefined) {
+    S.themeResult = null;
+    render();
+    return;
+  }
+
+  // ── Apply theme to meal ───────────────────────────────────────────
+  if (el.dataset.applyTheme !== undefined) {
+    if (!S.themeResult) return;
+    const mi = parseInt(el.dataset.applyTheme);
+    const key = `${S.day}-${mi}`;
+    S.customMeals[key] = [...S.themeResult.foods];
+    S.log[key] = [];
+    S.themeResult = null;
+    invalidateCache();
+    saveState();
+    render();
+    return;
+  }
+
+  // ── Clear selection ───────────────────────────────────────────────
+  if (el.id === "clear-sel") {
+    S.dynSel = [];
+    render();
+    return;
+  }
+
+  // ── Lab apply to meal ─────────────────────────────────────────────
+  if (el.id === "lab-apply-1" || el.id === "lab-apply-2") {
+    if (!S.dynSel.length) return;
+    const mi = el.id === "lab-apply-1" ? 0 : 1;
+    const key = `${S.day}-${mi}`;
+    S.customMeals[key] = [...S.dynSel];
+    S.log[key] = [];
+    S.dynSel = [];
+    invalidateCache();
+    saveState();
+    S.tab = "weekly";
+    render();
+    return;
+  }
+
+  // ── Export ────────────────────────────────────────────────────────
+  if (el.id === "export-btn") {
+    const b = new Blob([JSON.stringify({log:S.log,notes:S.notes,customMeals:S.customMeals},null,2)],{type:"application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(b);
+    a.download = "魚魚記錄備份.json";
+    a.click();
+    return;
+  }
+});
+
+// ── Delegated change/input handlers ───────────────────────────────
+document.getElementById("mc").addEventListener("input", function(e) {
+  const el = e.target;
+  if (el.id === "ni") {
+    S.notes[S.day] = el.value;
+    saveState();
+    return;
+  }
+});
+
+// ── Header nav (outside mc) ────────────────────────────────────────
+document.querySelector("nav").addEventListener("click", function(e) {
+  const btn = e.target.closest(".nb");
+  if (!btn) return;
+  S.tab = btn.dataset.tab;
+  document.querySelectorAll(".nb").forEach(b => b.classList.toggle("active", b.dataset.tab === S.tab));
+  render();
+});
+
+// ── Share FAB (outside mc) ─────────────────────────────────────────
+document.getElementById("share-fab").addEventListener("click", showSharePanel);
+
+// ── Optimistic nutrition bar update (no re-render) ─────────────────
+function updateMealNutBar(d, mi) {
+  const key = `${d}-${mi}`;
+  const customFoods = S.customMeals?.[key] || MENU[parseInt(d)]?.meals[parseInt(mi)]?.foods || [];
+  const eaten = S.log[key] || [];
+  const html = getMealNutSummary(customFoods);
+  // Update just the nut bar if it exists
+  const cards = document.querySelectorAll(".card");
+  // Simple approach: let next render handle it (already fast enough)
+}
+
+function showSharePanel(){
+  if(S.tab!=="weekly"){
+    S.tab="weekly";
+    document.querySelectorAll(".nb").forEach(b=>b.classList.toggle("active",b.dataset.tab==="weekly"));
+    render();
+  }
+  const ex=document.getElementById("share-panel");
+  if(ex){ex.remove();return;}
+  const d=S.day,dn=["星期一","星期二","星期三","星期四","星期五","星期六","星期日"];
+  const dt=new Date().toLocaleDateString("zh-HK",{month:"numeric",day:"numeric"});
+  let lines=[`🐟 魚魚副食品記錄 ${dt}（${dn[d]}）`,""];
+  MENU[d].meals.forEach((meal,mi)=>{
+    const eaten=S.log[`${d}-${mi}`]||[];
+    const foods=S.customMeals?.[`${d}-${mi}`]||meal.foods;
+    lines.push(`【${mi===0?"第一餐":"第二餐"}】${meal.name}`);
+    foods.forEach(food=>lines.push(`  ${eaten.includes(food)?"✅":"⬜"} ${food}（${FOODS[food]?.unit||""}）`));
+    if(eaten.length===foods.length) lines.push("  🎉 全部完成！");
+    lines.push("");
+  });
+  const note=S.notes[d];
+  if(note?.trim()){lines.push("📝 備註："+note.trim());lines.push("");}
+  const allE=[...(S.log[`${d}-0`]||[]),...(S.log[`${d}-1`]||[])];
+  if(allE.some(f=>FOODS[f]?.absorb==="heme")) lines.push("⚠️ 今日有補鐵餐，記得餐前後1小時勿餵奶");
+  lines.push("──────────────\n魚魚副食品工具 🐟");
+  const panel=document.createElement("div");
+  panel.id="share-panel";panel.className="share-bar";
+  panel.innerHTML=`<div class="share-title">📤 今日記錄 — 複製後貼到群組</div>
+    <textarea class="share-text" id="share-ta" readonly>${lines.join("\n")}</textarea>
+    <button class="share-copy" id="share-copy-btn">複製文字</button>`;
+  document.getElementById("mc").appendChild(panel);
+  panel.scrollIntoView({behavior:"smooth",block:"end"});
+  document.getElementById("share-copy-btn").addEventListener("click",()=>{
+    const ta=document.getElementById("share-ta");
+    if(navigator.clipboard) navigator.clipboard.writeText(ta.value).then(showToast);
+    else{ta.select();document.execCommand("copy");showToast();}
+    document.getElementById("share-copy-btn").textContent="已複製 ✓";
+    document.getElementById("share-copy-btn").classList.add("copied");
+  });
+}
+
+function showToast(){
+  const t=document.getElementById("share-toast");
+  t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),2500);
+}
+
+render();</script>
+<script>
+// 離線快取由 iOS Safari 限制，不使用 Service Worker
+
+// ── 讀取 URL 參數中的分頁 ────────────────────────────────────────────
+const urlTab = new URLSearchParams(window.location.search).get('tab');
+if (urlTab && ['weekly','dynamic','tracker','guide','about'].includes(urlTab)) {
+  S.tab = urlTab;
+  document.querySelectorAll('.nb').forEach(b => b.classList.toggle('active', b.dataset.tab === urlTab));
+  render();
+}
+
+// ── Pull to Refresh ───────────────────────────────────────────────────
+(function(){
+  let startY = 0;
+  let pulling = false;
+  let triggered = false;
+  const THRESHOLD = 80; // px needed to trigger refresh
+  const indicator = document.getElementById('ptr-indicator');
+
+  document.addEventListener('touchstart', e => {
+    // Only activate when at top of page
+    if (window.scrollY === 0) {
+      startY = e.touches[0].clientY;
+      pulling = true;
+      triggered = false;
+    }
+  }, {passive: true});
+
+  document.addEventListener('touchmove', e => {
+    if (!pulling) return;
+    const dy = e.touches[0].clientY - startY;
+    if (dy <= 0) { pulling = false; return; }
+
+    // Show indicator
+    if (dy > 20) {
+      indicator.classList.add('visible');
+      if (dy >= THRESHOLD && !triggered) {
+        indicator.textContent = '↑ 放開以重新整理';
+      } else if (dy < THRESHOLD) {
+        indicator.textContent = '↓ 繼續下拉重新整理';
+      }
+    }
+  }, {passive: true});
+
+  document.addEventListener('touchend', e => {
+    if (!pulling) return;
+    const dy = e.changedTouches[0].clientY - startY;
+    pulling = false;
+
+    if (dy >= THRESHOLD) {
+      // Trigger refresh
+      indicator.textContent = '🔄 重新整理中…';
+      indicator.classList.add('loading');
+      setTimeout(() => {
+        window.location.reload();
+      }, 400);
+    } else {
+      // Reset
+      indicator.classList.remove('visible');
+      indicator.textContent = '↓ 放開以重新整理';
+    }
+  }, {passive: true});
+})();
+</script>
+</body>
+</html>
